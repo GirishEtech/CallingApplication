@@ -285,4 +285,10 @@ class OutGoingCallActivity : AppCompatActivity() {
         return null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        if (call != null && call!!.isRttActive) {
+            call!!.disconnect()
+        }
+    }
 }
