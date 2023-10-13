@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/OutContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/call_bg"
+    tools:context=".OutGoingCallActivity">
+
+    <ImageButton
+        android:id="@+id/btnCallend"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_marginBottom="@dimen/_50ssp"
+        android:background="@drawable/btncall_bg"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:foreground="@drawable/ripple_effect"
+        android:padding="@dimen/_10ssp"
+        android:src="@drawable/ic_call"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.48"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/TxtCallName"
+        style="@style/H1Style"
+        android:gravity="center"
+        android:text="@string/lblcaller_name"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.15" />
+
+    <TextView
+        android:id="@+id/TxtCallerNumber"
+        style="@style/H2Style"
+        android:gravity="center"
+        android:text="@string/lblCallerNumber"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.19999999" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_200sdp"
+        android:layout_margin="@dimen/_10ssp"
+        android:background="@drawable/calling_bg"
+        android:padding="@dimen/_20ssp"
+        app:layout_constraintBottom_toTopOf="@+id/btnCallend"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.48"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TxtCallerNumber"
+        app:layout_constraintVertical_bias="0.636">
+
+        <ImageButton
+            android:id="@+id/btnAddCall"
+            style="@style/CallFeatureStyle"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/ic_add"
+            app:layout_constraintEnd_toStartOf="@+id/btnCallPuase"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCallPuase"
+            style="@style/CallFeatureStyle"
+            android:layout_marginTop="12dp"
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/ic_pause"
+            app:layout_constraintEnd_toStartOf="@+id/btnCallRecord"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnAddCall"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCallRecord"
+            style="@style/CallFeatureStyle"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_record"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnCallPuase"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnCallDial"
+            style="@style/CallFeatureStyle"
+            android:layout_marginTop="48dp"
+            android:layout_marginEnd="16dp"
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/ic_keypad"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnCallMute"
+            app:layout_constraintTop_toBottomOf="@+id/btnCallRecord" />
+
+        <ImageButton
+            android:id="@+id/btnCallMute"
+            style="@style/CallFeatureStyle"
+            android:layout_marginTop="48dp"
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/ic_mute"
+            app:layout_constraintEnd_toStartOf="@+id/btnCallDial"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnSpeaker"
+            app:layout_constraintTop_toBottomOf="@+id/btnCallPuase" />
+
+        <ImageButton
+            android:id="@+id/btnSpeaker"
+            style="@style/CallFeatureStyle"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="48dp"
+            android:foreground="@drawable/ripple_effect"
+            android:src="@drawable/ic_speaker"
+            app:layout_constraintEnd_toStartOf="@+id/btnCallMute"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnAddCall" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

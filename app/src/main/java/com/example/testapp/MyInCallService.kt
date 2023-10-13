@@ -2,17 +2,21 @@ package com.example.testapp
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.IBinder
 import android.telecom.Call
 import android.telecom.CallAudioState
 import android.telecom.InCallService
 import android.util.Log
 
-class MyInCallService :InCallService() {
+class MyInCallService : InCallService() {
+
     val TAG = "MyInCallService"
     override fun onCallAdded(call: Call?) {
         super.onCallAdded(call)
         Log.i(TAG, "onCallAdded: Call Added ")
+//        val intent = Intent(this, IncomingCallActivity::class.java)
+//        intent.putExtra("NAME", call!!.details.callerDisplayName)
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        startActivity(intent)
 
     }
 
@@ -22,7 +26,10 @@ class MyInCallService :InCallService() {
     }
 
     override fun onConnectionEvent(call: Call?, event: String?, extras: Bundle?) {
-        Log.i(TAG, "onConnectionEvent: call Object :$call \n Event is :$event \n Extras is :$extras")
+        Log.i(
+            TAG,
+            "onConnectionEvent: call Object :$call \n Event is :$event \n Extras is :$extras"
+        )
         super.onConnectionEvent(call, event, extras)
 
     }

@@ -1,20 +1,37 @@
 package com.example.testapp
 
-import android.telecom.CallAudioState
+import android.content.Context
+import android.content.Intent
 import android.telecom.Connection
+import android.telecom.DisconnectCause
 import android.util.Log
 
-class MyConnection : Connection() {
+class MyConnection(context: Context) : Connection() {
     val TAG = "MyConnection"
+
+    companion object {
+        var MAINSTATE = -1
+        fun getState(): Int {
+            return MAINSTATE
+        }
+    }
 
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
         connectionCapabilities = CAPABILITY_SUPPORT_HOLD and CAPABILITY_HOLD
+        context.startActivity(
+            Intent(
+                context,
+                OutGoingCallActivity::class.java
+            ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
     }
 
     override fun onStateChanged(state: Int) {
         super.onStateChanged(state)
+        MAINSTATE = state
         when (state) {
+
             STATE_INITIALIZING -> {
                 Log.d(TAG, "onStateChanged:STATE_INITIALIZING ")
             }
@@ -56,15 +73,15 @@ class MyConnection : Connection() {
     override fun onDisconnect() {
         super.onDisconnect()
         Log.i(TAG, "onDisconnect: on Disconnect is Call")
-    }
-
-    override fun onAnswer(videoState: Int) {
-        super.onAnswer(videoState)
+        setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+        destroy()
     }
 
     override fun onReject() {
         super.onReject()
         Log.i(TAG, "onReject: on Reject")
+        setDisconnected(DisconnectCause(DisconnectCause.LOCAL))
+        destroy()
     }
 
     override fun onShowIncomingCallUi() {
@@ -77,4 +94,5 @@ class MyConnection : Connection() {
         Log.i(TAG, "onUnhold: On Unhold")
 
     }
+
 }

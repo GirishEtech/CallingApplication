@@ -1,9 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.TestApp" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.CallingApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.TestApp" parent="Base.Theme.TestApp" />
+    <style name="Theme.CallingApp" parent="Base.Theme.CallingApp" />
+
+
+    <!--        text Styles-->
+    <style name="H1Style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/_20ssp</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="H2Style">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/_12ssp</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
+    </style>
+
+
+    <!--    ImageView Styles-->
+
+    <style name="CallFeatureStyle">
+        <item name="android:layout_width">@dimen/_45sdp</item>
+        <item name="android:layout_height">@dimen/_45sdp</item>
+        <item name="android:foreground">@drawable/ripple_effect</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
 </resources>
