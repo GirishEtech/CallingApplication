@@ -1,41 +1,45 @@
 package com.example.testapp
 
-import android.annotation.SuppressLint
 import android.telecom.Connection
 import android.telecom.ConnectionRequest
 import android.telecom.ConnectionService
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager.PRESENTATION_ALLOWED
 import android.util.Log
+import androidx.annotation.RequiresApi
 
 class CallService : ConnectionService() {
 
 
     companion object {
-        @SuppressLint("StaticFieldLeak")
-        var con: MyConnection? = null
+        lateinit var con: MyConnection
+
+        @RequiresApi(34)
         fun getConnection(): MyConnection {
-            return con!!
+            return con
         }
     }
 
 
     val TAG = "CallServiceDebug"
+
+    @RequiresApi(34)
     override fun onCreateOutgoingConnection(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
         request: ConnectionRequest?
     ): Connection {
         con = MyConnection(this)
-        con!!.setAddress(request!!.address, PRESENTATION_ALLOWED)
-        con!!.extras = request.extras
-        con!!.videoState = request.videoState
-        con!!.isRingbackRequested = true
+        con.setAddress(request!!.address, PRESENTATION_ALLOWED)
+        con.extras = request.extras
+        con.videoState = request.videoState
+        con.isRingbackRequested = true
         Log.i(TAG, "onCreateOutgoingConnection: Connection Is Started ")
         Log.i(TAG, "onCreateOutgoingConnection: ADDRESS OF CONNECTION :${request.address}")
         Log.i(TAG, "onCreateOutgoingConnection: CONNECTION ACCOUNT ;${request.accountHandle}")
-        return con!!
+        return con
     }
 
+    @RequiresApi(34)
     override fun onCreateIncomingConnection(
         connectionManagerPhoneAccount: PhoneAccountHandle?,
         request: ConnectionRequest?
@@ -68,5 +72,6 @@ class CallService : ConnectionService() {
         Log.i(TAG, "onCreateIncomingConnectionFailed: IncomingConnection Failed")
         super.onCreateIncomingConnectionFailed(connectionManagerPhoneAccount, request)
     }
+
 
 }

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -49,7 +50,8 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.READ_PHONE_NUMBERS,
                     Manifest.permission.READ_PHONE_STATE,
                     Manifest.permission.CALL_PHONE,
-                    Manifest.permission.ANSWER_PHONE_CALLS
+                    Manifest.permission.ANSWER_PHONE_CALLS,
+                    Manifest.permission.MODIFY_AUDIO_SETTINGS
                 ),
                 PERMISSION_REQUEST_CODE
             )
@@ -58,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             false
         } else {
             //createPhoneAccount()
-            Toast.makeText(this, "manage Own Calls is Granted", Toast.LENGTH_SHORT).show()
+            Log.i(TAG, "check: Permission is Granted...")
             true
         }
     }

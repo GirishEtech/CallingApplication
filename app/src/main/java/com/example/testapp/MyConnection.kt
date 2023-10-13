@@ -5,7 +5,9 @@ import android.content.Intent
 import android.telecom.Connection
 import android.telecom.DisconnectCause
 import android.util.Log
+import androidx.annotation.RequiresApi
 
+@RequiresApi(34)
 class MyConnection(context: Context) : Connection() {
     val TAG = "MyConnection"
 
@@ -19,6 +21,9 @@ class MyConnection(context: Context) : Connection() {
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
         connectionCapabilities = CAPABILITY_SUPPORT_HOLD and CAPABILITY_HOLD
+        Log.i(TAG, "current Call State : $state")
+        Log.i(TAG, "callerDisplayNamePresentation : $callerDisplayNamePresentation")
+        Log.i(TAG, "callerNumberVerificationStatus :$callerNumberVerificationStatus ")
         context.startActivity(
             Intent(
                 context,
@@ -31,6 +36,9 @@ class MyConnection(context: Context) : Connection() {
         super.onStateChanged(state)
         MAINSTATE = state
         when (state) {
+            STATE_NEW -> {
+                Log.d(TAG, "onStateChanged:New Call Instantiated  ")
+            }
 
             STATE_INITIALIZING -> {
                 Log.d(TAG, "onStateChanged:STATE_INITIALIZING ")

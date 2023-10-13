@@ -6,4 +6,7 @@
     <string name="lblMobilehint">Enter Mobile Number</string>
     <string name="lblExampleContactName">EXAMPLENAME</string>
     <string name="lblExampleNumber">1234567891</string>
+    <string name="lbl_calling">Calling..</string>
+    <string name="lbl_active">Active</string>
+    <string name="lbl_dialing">Dialing</string>
 </resources>

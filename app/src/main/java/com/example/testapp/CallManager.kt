@@ -40,12 +40,12 @@ class CallManager(
             val account = telecomManager.getPhoneAccount(phoneAccountHandle)
             val isCallableAccount =
                 telecomManager.isOutgoingCallPermitted(phoneAccountHandle)
+
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
                 val uri = Uri.parse("tel:+917984017578")
                 // val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, "+917984017578", number)
                 telecomManager.placeCall(uri, test)
-
             } else {
                 Log.d(TAG, "account is not Available")
             }
@@ -78,9 +78,11 @@ class CallManager(
         phoneAccountHandle = PhoneAccountHandle(componentName, "123UUID")
         val phoneAccount = PhoneAccount.Builder(
             phoneAccountHandle,
-            "MyApplication"
+            "${R.string.app_name}"
         )
-            .setCapabilities(PhoneAccount.CAPABILITY_SELF_MANAGED)
+            .setCapabilities(
+                PhoneAccount.CAPABILITY_CALL_PROVIDER
+            )
             .setIcon(Icon.createWithResource(context, R.drawable.ic_call))
             .setShortDescription("${R.string.app_name}")
             .build()

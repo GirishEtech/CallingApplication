@@ -5,6 +5,9 @@
         android:name="android.hardware.telephony"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
@@ -64,21 +67,21 @@
                 android:name="android.telecom.selfManageCalls"
                 android:value="true" />
         </service>
-        <!--        <service-->
-        <!--            android:name=".MyInCallService"-->
-        <!--            android:exported="true"-->
-        <!--            android:permission="android.permission.BIND_INCALL_SERVICE">-->
-        <!--            <meta-data-->
-        <!--                android:name="android.telecom.IN_CALL_SERVICE_UI"-->
-        <!--                android:value="true" />-->
-        <!--            <meta-data-->
-        <!--                android:name="android.telecom.IN_CALL_SERVICE_RINGING"-->
-        <!--                android:value="true" />-->
+        <service
+            android:name=".MyInCallService"
+            android:exported="true"
+            android:permission="android.permission.BIND_INCALL_SERVICE">
+            <meta-data
+                android:name="android.telecom.IN_CALL_SERVICE_UI"
+                android:value="true" />
+            <meta-data
+                android:name="android.telecom.IN_CALL_SERVICE_RINGING"
+                android:value="true" />
 
-        <!--            <intent-filter>-->
-        <!--                <action android:name="android.telecom.InCallService" />-->
-        <!--            </intent-filter>-->
-        <!--        </service>-->
+            <intent-filter>
+                <action android:name="android.telecom.InCallService" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name=".CallReceiver"

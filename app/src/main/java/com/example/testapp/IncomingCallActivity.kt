@@ -1,15 +1,25 @@
 package com.example.testapp
 
+import android.content.Intent
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Bundle
+import android.telecom.Call
+import android.telecom.VideoProfile
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.testapp.databinding.ActivityIncomingCallBinding
 
 
+@Suppress("CAST_NEVER_SUCCEEDS")
 class IncomingCallActivity : AppCompatActivity() {
 
+    companion object {
+        var call: Call? = null
+    }
+
+    val TAG = "IncomingCallActivity"
     lateinit var ringtone: Ringtone
     lateinit var _binding: ActivityIncomingCallBinding
     private val binding: ActivityIncomingCallBinding
@@ -19,9 +29,10 @@ class IncomingCallActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val name = intent.getStringExtra("NAME")
-        if (name != null) {
-            binding.TxtCallName.text = name
+        if (call != null) {
+            binding.TxtCallName.text = call!!.details.callerDisplayName
+            binding.TxtCallerNumber.text = call!!.details.handle.schemeSpecificPart
+            Log.i(TAG, "onCreate: full call Details ${call!!.details} ")
             Toast.makeText(this, "call is Ringing", Toast.LENGTH_SHORT).show()
         }
         initComponent()
@@ -35,13 +46,32 @@ class IncomingCallActivity : AppCompatActivity() {
 
     private fun initComponent() {
         startDefaultRingtone()
+        binding.btnCallAccept.setOnClickListener {
+            if (call != null) {
+                call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
+                call!!.playDtmfTone('1')
+                startActivity(Intent(this, OutGoingCallActivity::class.java))
+                stopRingtone()
+            }
+        }
+        binding.btnCallDecline.setOnClickListener {
+            if (call != null) {
+                call!!.reject(Call.REJECT_REASON_DECLINED)
+                startActivity(Intent(this, MainActivity::class.java))
+                stopRingtone()
+            }
+        }
     }
 
     override fun onStop() {
         super.onStop()
+        stopRingtone()
+
+    }
+
+    fun stopRingtone() {
         if (ringtone.isPlaying) {
             ringtone.stop()
         }
-
     }
 }

@@ -3,4 +3,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="bg_CallFunction">#9FFFFFFF</color>
+    <color name="SpeakerOn">#1131E3</color>
 </resources>

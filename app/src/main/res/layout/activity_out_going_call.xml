@@ -8,6 +8,18 @@
     android:background="@drawable/call_bg"
     tools:context=".OutGoingCallActivity">
 
+    <TextView
+        android:id="@+id/txtCallingStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#F3DEDE"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TxtCallerNumber"
+        app:layout_constraintVertical_bias="0.156" />
+
     <ImageButton
         android:id="@+id/btnCallend"
         android:layout_width="@dimen/_60sdp"
@@ -41,6 +53,7 @@
         style="@style/H2Style"
         android:gravity="center"
         android:text="@string/lblCallerNumber"
+        android:textColor="#1E0D0D"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -50,6 +63,7 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="@dimen/_200sdp"
         android:layout_margin="@dimen/_10ssp"
@@ -120,13 +134,14 @@
             app:layout_constraintStart_toEndOf="@+id/btnSpeaker"
             app:layout_constraintTop_toBottomOf="@+id/btnCallPuase" />
 
-        <ImageButton
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btnSpeaker"
             style="@style/CallFeatureStyle"
             android:layout_marginStart="16dp"
             android:layout_marginTop="48dp"
             android:foreground="@drawable/ripple_effect"
             android:src="@drawable/ic_speaker"
+            app:layout_constraintCircleRadius="@dimen/_45sdp"
             app:layout_constraintEnd_toStartOf="@+id/btnCallMute"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
