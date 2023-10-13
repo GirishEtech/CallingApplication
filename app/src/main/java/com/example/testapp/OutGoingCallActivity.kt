@@ -7,6 +7,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -15,6 +16,7 @@ import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.CallLog
 import android.telecom.Call
 import android.telecom.Connection.*
 import android.telecom.VideoProfile
@@ -59,6 +61,31 @@ class OutGoingCallActivity : AppCompatActivity() {
             Toast.makeText(this, "Audio Permission Denied", Toast.LENGTH_SHORT).show()
         } else {
             speakerManage()
+        }
+    }
+
+    @SuppressLint("Range")
+    private fun deleteEntry() {
+        val callLogUri = CallLog.Calls.CONTENT_URI
+
+        // Sort the call log by date in descending order to get the last entry
+        val sortOrder = CallLog.Calls.DATE + " DESC"
+        val cursor = contentResolver.query(callLogUri, null, null, null, sortOrder)
+
+        if (cursor != null && cursor.moveToFirst()) {
+            // Get the call log ID of the last entry
+            val callLogId = cursor.getLong(cursor.getColumnIndex(CallLog.Calls._ID))
+
+            // Construct the URI for the specific call log entry
+            val callUri = ContentUris.withAppendedId(callLogUri, callLogId)
+
+            // Delete the last call log entry
+            val rs = contentResolver.delete(callUri, null, null)
+            if (rs > 0) {
+                Toast.makeText(this, "deleted", Toast.LENGTH_SHORT).show()
+            }
+            // Close the cursor when done
+            cursor.close()
         }
     }
 
@@ -139,6 +166,7 @@ class OutGoingCallActivity : AppCompatActivity() {
                         call!!.disconnect()
                         call.reject(Call.REJECT_REASON_DECLINED)
                         startActivity(Intent(this@OutGoingCallActivity, MainActivity::class.java))
+                        deleteEntry()
                     }
 
                     Call.STATE_DISCONNECTING -> {
@@ -211,8 +239,10 @@ class OutGoingCallActivity : AppCompatActivity() {
             } else {
                 if (call == null) {
                     startActivity(Intent(this, MainActivity::class.java))
+                    deleteEntry()
                 } else {
                     call!!.disconnect()
+                    deleteEntry()
                 }
             }
         }

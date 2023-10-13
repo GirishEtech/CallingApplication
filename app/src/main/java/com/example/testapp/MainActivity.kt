@@ -51,7 +51,9 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.READ_PHONE_STATE,
                     Manifest.permission.CALL_PHONE,
                     Manifest.permission.ANSWER_PHONE_CALLS,
-                    Manifest.permission.MODIFY_AUDIO_SETTINGS
+                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                    Manifest.permission.READ_CALL_LOG,
+                    Manifest.permission.WRITE_CALL_LOG
                 ),
                 PERMISSION_REQUEST_CODE
             )
