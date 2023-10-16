@@ -48,6 +48,7 @@ class IncomingCallActivity : AppCompatActivity() {
         startDefaultRingtone()
         binding.btnCallAccept.setOnClickListener {
             if (call != null) {
+                OutGoingCallActivity.call = call
                 call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
                 call!!.playDtmfTone('1')
                 startActivity(Intent(this, OutGoingCallActivity::class.java))
