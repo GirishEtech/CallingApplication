@@ -18,7 +18,7 @@ class MyInCallService : InCallService() {
         Log.i(TAG, "onCallAdded: CallerName :${call!!.details.callerDisplayName}")
         Log.i(TAG, "onCallAdded:Call Extras ${call.details.extras}")
         Log.i(TAG, "onCallAdded: Gateway info ${call.details.gatewayInfo}")
-
+        
         val details = call.details
         val callDirection = details.callDirection
         when (callDirection) {

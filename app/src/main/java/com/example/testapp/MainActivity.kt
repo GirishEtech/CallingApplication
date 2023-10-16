@@ -14,10 +14,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.testapp.databinding.ActivityMainBinding
 
+
 class MainActivity : AppCompatActivity() {
 
     val TAG = "MainActivity"
-
     private val REQUEST_ID: Int = 2
     lateinit var CallManager: CallManager
     private val PERMISSION_REQUEST_CODE = 100
@@ -53,7 +53,8 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ANSWER_PHONE_CALLS,
                     Manifest.permission.MODIFY_AUDIO_SETTINGS,
                     Manifest.permission.READ_CALL_LOG,
-                    Manifest.permission.WRITE_CALL_LOG
+                    Manifest.permission.WRITE_CALL_LOG,
+                    Manifest.permission.RECORD_AUDIO
                 ),
                 PERMISSION_REQUEST_CODE
             )

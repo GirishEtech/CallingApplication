@@ -30,12 +30,16 @@ class CallManager(
         createPhoneAccount()
     }
 
+    @RequiresApi(34)
     @SuppressLint("MissingPermission")
     fun startOutgoingCall() {
         //showPhoneAccount()
         val test = Bundle()
-        test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
+//        test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
         test.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
+        test.putBoolean(context.packageName + ".extra.NO_CALL_LOG", true)
+        //CallResponse
+
         try {
             val account = telecomManager.getPhoneAccount(phoneAccountHandle)
             val isCallableAccount =
@@ -43,7 +47,7 @@ class CallManager(
 
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
-                val uri = Uri.parse("tel:+917984017578")
+                val uri = Uri.parse("tel:+919023339748")
                 // val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, "+917984017578", number)
                 telecomManager.placeCall(uri, test)
             } else {

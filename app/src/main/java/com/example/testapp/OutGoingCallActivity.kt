@@ -7,16 +7,15 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
-import android.provider.CallLog
+import android.os.Environment
 import android.telecom.Call
 import android.telecom.Connection.*
 import android.telecom.VideoProfile
@@ -27,10 +26,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
+import java.io.File
+import java.io.IOException
 
 
 class OutGoingCallActivity : AppCompatActivity() {
 
+    lateinit var mediaRecorder: MediaRecorder
     lateinit var audioManager: AudioManager
 
     companion object {
@@ -64,30 +66,6 @@ class OutGoingCallActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("Range")
-    private fun deleteEntry() {
-        val callLogUri = CallLog.Calls.CONTENT_URI
-
-        // Sort the call log by date in descending order to get the last entry
-        val sortOrder = CallLog.Calls.DATE + " DESC"
-        val cursor = contentResolver.query(callLogUri, null, null, null, sortOrder)
-
-        if (cursor != null && cursor.moveToFirst()) {
-            // Get the call log ID of the last entry
-            val callLogId = cursor.getLong(cursor.getColumnIndex(CallLog.Calls._ID))
-
-            // Construct the URI for the specific call log entry
-            val callUri = ContentUris.withAppendedId(callLogUri, callLogId)
-
-            // Delete the last call log entry
-            val rs = contentResolver.delete(callUri, null, null)
-            if (rs > 0) {
-                Toast.makeText(this, "deleted", Toast.LENGTH_SHORT).show()
-            }
-            // Close the cursor when done
-            cursor.close()
-        }
-    }
 
     @SuppressLint("ResourceType")
     private fun speakerManage() {
@@ -106,7 +84,7 @@ class OutGoingCallActivity : AppCompatActivity() {
                 } else {
                     Log.i(TAG, "speakerManage: Speaker off ${audioManager.isSpeakerphoneOn}")
                     isSpeakerOn = true
-                    audioManager.mode = AudioManager.MODE_IN_CALL
+                    audioManager.mode = AudioManager.RINGER_MODE_SILENT
                     audioManager.isSpeakerphoneOn = false
                     binding.btnSpeaker.imageTintList = ColorStateList.valueOf(SpeakerOff)
                 }
@@ -130,6 +108,7 @@ class OutGoingCallActivity : AppCompatActivity() {
                         binding.txtCallingStatus.text = getString(R.string.lbl_active)
                         call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
                         call.playDtmfTone('1')
+                        startRecording()
                     }
 
                     Call.STATE_AUDIO_PROCESSING -> {
@@ -165,8 +144,8 @@ class OutGoingCallActivity : AppCompatActivity() {
                         ).show()
                         call!!.disconnect()
                         call.reject(Call.REJECT_REASON_DECLINED)
+                        stopRecording()
                         startActivity(Intent(this@OutGoingCallActivity, MainActivity::class.java))
-                        deleteEntry()
                     }
 
                     Call.STATE_DISCONNECTING -> {
@@ -180,7 +159,7 @@ class OutGoingCallActivity : AppCompatActivity() {
                     Call.STATE_HOLDING -> {
                         Toast.makeText(
                             this@OutGoingCallActivity,
-                            "Call is Active",
+                            "Call is Holding",
                             Toast.LENGTH_SHORT
                         ).show()
                         call!!.hold()
@@ -225,6 +204,41 @@ class OutGoingCallActivity : AppCompatActivity() {
         })
     }
 
+    private fun stopRecording() {
+        try {
+            mediaRecorder.apply {
+                stop()
+                //release()
+                Log.i(TAG, "stopRecording: Recording is Stop")
+            }
+        } catch (ex: Exception) {
+            Log.i(TAG, "stopRecording:${ex.message}")
+        }
+    }
+
+    private fun startRecording() {
+        mediaRecorder = MediaRecorder(this)
+        mediaRecorder.apply {
+            setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+            setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+        }
+        val outputFileName = "call(${call!!.details.handle.schemeSpecificPart}).m4a"
+        val outputFilePath =
+            Environment.getExternalStorageDirectory().absolutePath + File.separator + outputFileName
+        Log.i(TAG, "startRecording: outputFilePath :$outputFilePath")
+        mediaRecorder.setOutputFile(outputFilePath)
+        try {
+            mediaRecorder.prepare()
+            mediaRecorder.start()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.i(TAG, "startRecording: ${e.message}")
+        }
+
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun initComponents() {
         setAnimation()
@@ -239,10 +253,9 @@ class OutGoingCallActivity : AppCompatActivity() {
             } else {
                 if (call == null) {
                     startActivity(Intent(this, MainActivity::class.java))
-                    deleteEntry()
                 } else {
                     call!!.disconnect()
-                    deleteEntry()
+                    //deleteEntry()
                 }
             }
         }
@@ -273,22 +286,5 @@ class OutGoingCallActivity : AppCompatActivity() {
         animatorSet.start() // Start the animation
     }
 
-    private fun getDevice(): AudioDeviceInfo? {
-        val speakerDevice: AudioDeviceInfo?
-        val devices: List<AudioDeviceInfo> = audioManager.availableCommunicationDevices
-        for (device in devices) {
-            if (device.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
-                speakerDevice = device
-                return speakerDevice
-            }
-        }
-        return null
-    }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (call != null && call!!.isRttActive) {
-            call!!.disconnect()
-        }
-    }
 }
