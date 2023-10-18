@@ -9,6 +9,7 @@ import android.telecom.VideoProfile
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.callingapp.Utils.Utils
 import com.example.testapp.databinding.ActivityIncomingCallBinding
 
 
@@ -30,7 +31,8 @@ class IncomingCallActivity : AppCompatActivity() {
         _binding = ActivityIncomingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if (call != null) {
-            binding.TxtCallName.text = call!!.details.callerDisplayName
+            binding.TxtCallName.text =
+                Utils.getCallerName(this, call!!.details.handle.schemeSpecificPart)
             binding.TxtCallerNumber.text = call!!.details.handle.schemeSpecificPart
             Log.i(TAG, "onCreate: full call Details ${call!!.details} ")
             Toast.makeText(this, "call is Ringing", Toast.LENGTH_SHORT).show()

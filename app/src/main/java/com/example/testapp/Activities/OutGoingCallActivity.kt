@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.callingapp.Utils.Utils
 import com.example.testapp.R
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
 import java.io.File
@@ -243,8 +244,10 @@ class OutGoingCallActivity : AppCompatActivity() {
         setAnimation()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         if (call != null) {
-            binding.TxtCallName.text = call!!.details.callerDisplayName
-            binding.TxtCallerNumber.text = call!!.details.handle.schemeSpecificPart
+            val name = Utils.getCallerName(this, call!!.details.handle.schemeSpecificPart)
+            val number = call!!.details.handle.schemeSpecificPart
+            binding.TxtCallName.text = name
+            binding.TxtCallerNumber.text = number
         }
         binding.btnCallend.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(

@@ -36,7 +36,7 @@ class CallManager(
     fun startOutgoingCall(number: String) {
         //showPhoneAccount()
         val test = Bundle()
-        test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
+        //test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
         test.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
         // test.putBoolean(context.packageName + ".extra.NO_CALL_LOG", true)
         //CallResponse
@@ -47,7 +47,7 @@ class CallManager(
                 telecomManager.isOutgoingCallPermitted(phoneAccountHandle)
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
-                val uri = Uri.parse("tel:+91$number")
+                val uri = Uri.parse("tel:+91${number.substringAfter("+91")}")
                 telecomManager.placeCall(uri, test)
             } else {
                 Log.d(TAG, "account is not Available")

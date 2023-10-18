@@ -2,6 +2,8 @@ package com.example.callingapp.Utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.database.Cursor
+import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
 import com.example.testapp.Models.Contact
@@ -68,6 +70,31 @@ class Utils {
                 phoneCursor.close()
             }
             return numbers.toString()
+        }
+
+        @SuppressLint("Range")
+        fun getCallerName(context: Context, number: String): String {
+
+            var callerName: String? = null
+
+            val uri = Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                Uri.encode(number)
+            )
+            val projection = arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME)
+
+            val cursor: Cursor = context.contentResolver.query(uri, projection, null, null, null)!!
+
+            if (cursor.moveToFirst()) {
+                callerName =
+                    cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME))
+                cursor.close()
+            }
+
+            if (callerName == null) {
+                callerName = "Unknown Caller" // Set a default or placeholder name
+            }
+            return callerName
         }
     }
 }

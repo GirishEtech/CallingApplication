@@ -38,4 +38,9 @@
     <style name="txt">
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="CustomSearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <item name="background">@drawable/custom_seachview</item>
+    </style>
+
 </resources>

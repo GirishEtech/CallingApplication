@@ -9,4 +9,5 @@
     <string name="lbl_calling">Calling..</string>
     <string name="lbl_active">Active</string>
     <string name="lbl_dialing">Dialing</string>
+    <string name="lblsearchhint">Search...</string>
 </resources>

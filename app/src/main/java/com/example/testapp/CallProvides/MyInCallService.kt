@@ -27,8 +27,6 @@ class MyInCallService : InCallService() {
             Details.DIRECTION_OUTGOING -> {
                 OutGoingCallActivity.call = call
                 val intent = Intent(this, OutGoingCallActivity::class.java)
-                intent.putExtra("NAME", call.details.callerDisplayName)
-                intent.putExtra("NUMBER", call.details.handle.schemeSpecificPart)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }
@@ -55,12 +53,12 @@ class MyInCallService : InCallService() {
     }
 
     override fun onConnectionEvent(call: Call?, event: String?, extras: Bundle?) {
+
+        super.onConnectionEvent(call, event, extras)
         Log.i(
             TAG,
             "onConnectionEvent: call Object :$call \n Event is :$event \n Extras is :$extras"
         )
-        super.onConnectionEvent(call, event, extras)
-
     }
 
     override fun onCallAudioStateChanged(audioState: CallAudioState?) {

@@ -95,6 +95,7 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
         adapter = ContactAdapter(
             items, this
         )
+        binding.searchView.setIconifiedByDefault(false)
         binding.contactList.adapter = adapter
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
