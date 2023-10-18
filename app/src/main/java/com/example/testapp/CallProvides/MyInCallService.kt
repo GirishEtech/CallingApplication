@@ -1,4 +1,4 @@
-package com.example.testapp
+package com.example.testapp.CallProvides
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +7,8 @@ import android.telecom.Call.Details
 import android.telecom.CallAudioState
 import android.telecom.InCallService
 import android.util.Log
+import com.example.testapp.Activities.IncomingCallActivity
+import com.example.testapp.Activities.OutGoingCallActivity
 
 
 class MyInCallService : InCallService() {
@@ -18,7 +20,7 @@ class MyInCallService : InCallService() {
         Log.i(TAG, "onCallAdded: CallerName :${call!!.details.callerDisplayName}")
         Log.i(TAG, "onCallAdded:Call Extras ${call.details.extras}")
         Log.i(TAG, "onCallAdded: Gateway info ${call.details.gatewayInfo}")
-        
+
         val details = call.details
         val callDirection = details.callDirection
         when (callDirection) {
@@ -26,6 +28,7 @@ class MyInCallService : InCallService() {
                 OutGoingCallActivity.call = call
                 val intent = Intent(this, OutGoingCallActivity::class.java)
                 intent.putExtra("NAME", call.details.callerDisplayName)
+                intent.putExtra("NUMBER", call.details.handle.schemeSpecificPart)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 startActivity(intent)
             }

@@ -1,4 +1,4 @@
-package com.example.testapp
+package com.example.testapp.CallProvides
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -15,11 +15,12 @@ import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.testapp.R
 
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class CallManager(
-    private val context: Context, private val number: String
+    private val context: Context
 ) {
     private val TAG = "CallManager"
     private var telecomManager: TelecomManager =
@@ -32,23 +33,21 @@ class CallManager(
 
     @RequiresApi(34)
     @SuppressLint("MissingPermission")
-    fun startOutgoingCall() {
+    fun startOutgoingCall(number: String) {
         //showPhoneAccount()
         val test = Bundle()
-//        test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
+        test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
         test.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
-        test.putBoolean(context.packageName + ".extra.NO_CALL_LOG", true)
+        // test.putBoolean(context.packageName + ".extra.NO_CALL_LOG", true)
         //CallResponse
 
         try {
             val account = telecomManager.getPhoneAccount(phoneAccountHandle)
             val isCallableAccount =
                 telecomManager.isOutgoingCallPermitted(phoneAccountHandle)
-
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
-                val uri = Uri.parse("tel:+919023339748")
-                // val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, "+917984017578", number)
+                val uri = Uri.parse("tel:+91$number")
                 telecomManager.placeCall(uri, test)
             } else {
                 Log.d(TAG, "account is not Available")
@@ -64,7 +63,7 @@ class CallManager(
     fun startIncomingCall() {
         if (this.context.checkSelfPermission(Manifest.permission.MANAGE_OWN_CALLS) == PackageManager.PERMISSION_GRANTED) {
             val extras = Bundle()
-            val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null)
+            val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, "", null)
             extras.putParcelable(TelecomManager.EXTRA_INCOMING_CALL_ADDRESS, uri)
             extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
             extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)

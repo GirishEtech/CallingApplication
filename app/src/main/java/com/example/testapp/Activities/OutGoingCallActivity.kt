@@ -1,4 +1,4 @@
-package com.example.testapp
+package com.example.testapp.Activities
 
 
 import android.Manifest
@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.testapp.R
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
 import java.io.File
 import java.io.IOException
@@ -40,8 +41,6 @@ class OutGoingCallActivity : AppCompatActivity() {
     }
 
     val TAG = "OutGoingCallActivity"
-
-    //lateinit var connection: MyConnection
     lateinit var _binding: ActivityOutGoingCallBinding
     val binding: ActivityOutGoingCallBinding
         get() = _binding
@@ -243,6 +242,10 @@ class OutGoingCallActivity : AppCompatActivity() {
     private fun initComponents() {
         setAnimation()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        if (call != null) {
+            binding.TxtCallName.text = call!!.details.callerDisplayName
+            binding.TxtCallerNumber.text = call!!.details.handle.schemeSpecificPart
+        }
         binding.btnCallend.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(
                     this,

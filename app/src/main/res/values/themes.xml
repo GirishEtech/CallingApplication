@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.CallingApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
@@ -33,5 +33,9 @@
         <item name="android:scaleType">centerCrop</item>
         <item name="android:backgroundTint">@android:color/transparent</item>
         <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="txt">
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>

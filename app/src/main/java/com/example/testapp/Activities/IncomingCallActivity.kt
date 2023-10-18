@@ -1,4 +1,4 @@
-package com.example.testapp
+package com.example.testapp.Activities
 
 import android.content.Intent
 import android.media.Ringtone

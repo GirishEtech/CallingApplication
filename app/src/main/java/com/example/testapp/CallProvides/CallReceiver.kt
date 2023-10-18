@@ -1,4 +1,4 @@
-package com.example.testapp
+package com.example.testapp.CallProvides
 
 import android.Manifest
 import android.app.PendingIntent
@@ -11,6 +11,7 @@ import android.telephony.TelephonyManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import com.example.testapp.Activities.IncomingCallActivity
 
 
 class CallReceiver : BroadcastReceiver() {
@@ -37,7 +38,7 @@ class CallReceiver : BroadcastReceiver() {
                     activityIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT
                 )
-                val manager = CallManager(context, "")
+                val manager = CallManager(context)
                 //manager.startIncomingCall()
                 intent!!.putExtra("pendingIntent", pendingIntent)
                 context.startActivity(intent)

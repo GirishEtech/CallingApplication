@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/call_bg"
-    tools:context=".OutGoingCallActivity">
+    tools:context=".Activities.OutGoingCallActivity">
 
     <TextView
         android:id="@+id/txtCallingStatus"
