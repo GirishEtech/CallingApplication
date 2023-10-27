@@ -1,5 +1,6 @@
 package com.example.testapp.Adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Filter
@@ -10,10 +11,10 @@ import com.example.testapp.databinding.ContactItemBinding
 import java.util.Locale
 
 class ContactAdapter(
-    val items: ArrayList<Contact>,
+    val items: List<Contact>,
     val datapass: number
 ) : RecyclerView.Adapter<ContactAdapter.Holder>(), Filterable {
-    private var filteredDataList: ArrayList<Contact> = items
+    private var filteredDataList: List<Contact> = items
 
     interface number {
         fun passdata(data: Contact)
@@ -31,7 +32,12 @@ class ContactAdapter(
     }
 
     override fun getItemCount(): Int {
-        return filteredDataList.size
+        if (filteredDataList.isEmpty()) {
+            Log.i("TAG", "getItemCount: ")
+        } else {
+            return filteredDataList.size
+        }
+        return 0
     }
 
 

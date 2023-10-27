@@ -83,14 +83,14 @@
             android:layout_marginTop="12dp"
             android:foreground="@drawable/ripple_effect"
             android:src="@drawable/ic_add"
-            app:layout_constraintEnd_toStartOf="@+id/btnCallPuase"
+            app:layout_constraintEnd_toStartOf="@+id/btnCallHold"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/btnCallPuase"
+            android:id="@+id/btnCallHold"
             style="@style/CallFeatureStyle"
             android:layout_marginTop="12dp"
             android:foreground="@drawable/ripple_effect"
@@ -108,7 +108,7 @@
             android:src="@drawable/ic_record"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnCallPuase"
+            app:layout_constraintStart_toEndOf="@+id/btnCallHold"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
@@ -132,7 +132,7 @@
             app:layout_constraintEnd_toStartOf="@+id/btnCallDial"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnSpeaker"
-            app:layout_constraintTop_toBottomOf="@+id/btnCallPuase" />
+            app:layout_constraintTop_toBottomOf="@+id/btnCallHold" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btnSpeaker"

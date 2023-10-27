@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.testapp"
-        minSdk = 31
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -52,5 +52,6 @@ dependencies {
     implementation("com.intuit.ssp:ssp-android:1.1.0")
 
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.security:security-crypto:1.0.0")
 
 }

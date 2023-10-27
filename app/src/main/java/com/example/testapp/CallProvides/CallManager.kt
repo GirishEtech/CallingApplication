@@ -47,6 +47,7 @@ class CallManager(
                 telecomManager.isOutgoingCallPermitted(phoneAccountHandle)
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
+                //${number.substringAfter("+91")}
                 val uri = Uri.parse("tel:+91${number.substringAfter("+91")}")
                 telecomManager.placeCall(uri, test)
             } else {

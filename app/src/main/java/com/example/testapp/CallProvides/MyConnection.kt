@@ -22,9 +22,6 @@ class MyConnection(context: Context) : Connection() {
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
         connectionCapabilities = CAPABILITY_SUPPORT_HOLD and CAPABILITY_HOLD
-        Log.i(TAG, "current Call State : $state")
-        Log.i(TAG, "callerDisplayNamePresentation : $callerDisplayNamePresentation")
-        Log.i(TAG, "callerNumberVerificationStatus :$callerNumberVerificationStatus ")
         context.startActivity(
             Intent(
                 context,

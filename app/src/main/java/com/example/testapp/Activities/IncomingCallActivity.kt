@@ -3,11 +3,13 @@ package com.example.testapp.Activities
 import android.content.Intent
 import android.media.Ringtone
 import android.media.RingtoneManager
+import android.os.Build
 import android.os.Bundle
 import android.telecom.Call
 import android.telecom.VideoProfile
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.databinding.ActivityIncomingCallBinding
@@ -36,8 +38,74 @@ class IncomingCallActivity : AppCompatActivity() {
             binding.TxtCallerNumber.text = call!!.details.handle.schemeSpecificPart
             Log.i(TAG, "onCreate: full call Details ${call!!.details} ")
             Toast.makeText(this, "call is Ringing", Toast.LENGTH_SHORT).show()
+            callBack()
         }
         initComponent()
+    }
+
+    private fun callBack() {
+        call!!.registerCallback(object : Call.Callback() {
+            @RequiresApi(Build.VERSION_CODES.R)
+            override fun onStateChanged(call: Call?, state: Int) {
+                super.onStateChanged(call, state)
+                when (state) {
+                    Call.STATE_DISCONNECTED -> {
+                        Toast.makeText(
+                            this@IncomingCallActivity,
+                            "Call is Disconnected",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        call!!.disconnect()
+                        call.reject(Call.REJECT_REASON_DECLINED)
+                        startActivity(Intent(this@IncomingCallActivity, MainActivity::class.java))
+                        finish()
+                    }
+
+                    Call.STATE_SELECT_PHONE_ACCOUNT -> {
+
+                    }
+
+                    Call.STATE_SIMULATED_RINGING -> {
+
+                    }
+
+                    Call.STATE_ACTIVE -> {
+
+                    }
+
+                    Call.STATE_AUDIO_PROCESSING -> {
+                    }
+
+                    Call.STATE_CONNECTING -> {
+                        TODO()
+                    }
+
+                    Call.STATE_DIALING -> {
+                        TODO()
+                    }
+
+                    Call.STATE_DISCONNECTING -> {
+                        TODO()
+                    }
+
+                    Call.STATE_HOLDING -> {
+                        TODO()
+                    }
+
+                    Call.STATE_NEW -> {
+                        TODO()
+                    }
+
+                    Call.STATE_PULLING_CALL -> {
+                        TODO()
+                    }
+
+                    Call.STATE_RINGING -> {
+                        TODO()
+                    }
+                }
+            }
+        })
     }
 
     fun startDefaultRingtone() {
@@ -46,6 +114,7 @@ class IncomingCallActivity : AppCompatActivity() {
         ringtone.play()
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     private fun initComponent() {
         startDefaultRingtone()
         binding.btnCallAccept.setOnClickListener {
@@ -55,6 +124,7 @@ class IncomingCallActivity : AppCompatActivity() {
                 call!!.playDtmfTone('1')
                 startActivity(Intent(this, OutGoingCallActivity::class.java))
                 stopRingtone()
+                finish()
             }
         }
         binding.btnCallDecline.setOnClickListener {

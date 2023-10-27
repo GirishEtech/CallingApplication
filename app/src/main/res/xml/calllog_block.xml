@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<app-log-config>
-    <app
-        name="com.example.testapp"
-        blockMatch="true">
-        <attribute name="android:isForegroundCall" />
-    </app>
-</app-log-config>

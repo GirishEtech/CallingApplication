@@ -1,12 +1,14 @@
 package com.example.testapp.CallProvides
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.telecom.Call
 import android.telecom.Call.Details
 import android.telecom.CallAudioState
 import android.telecom.InCallService
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.example.testapp.Activities.IncomingCallActivity
 import com.example.testapp.Activities.OutGoingCallActivity
 
@@ -14,6 +16,8 @@ import com.example.testapp.Activities.OutGoingCallActivity
 class MyInCallService : InCallService() {
 
     val TAG = "MyInCallService"
+
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCallAdded(call: Call?) {
         super.onCallAdded(call)
         Log.i(TAG, "onCallAdded: Call Added ")
@@ -60,8 +64,5 @@ class MyInCallService : InCallService() {
             "onConnectionEvent: call Object :$call \n Event is :$event \n Extras is :$extras"
         )
     }
-
-    override fun onCallAudioStateChanged(audioState: CallAudioState?) {
-        super.onCallAudioStateChanged(audioState)
-    }
+    
 }
