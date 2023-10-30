@@ -1,5 +1,6 @@
 package com.example.testapp.Activities
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -10,13 +11,12 @@ import android.telecom.VideoProfile
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.databinding.ActivityIncomingCallBinding
 
 
 @Suppress("CAST_NEVER_SUCCEEDS")
-class IncomingCallActivity : AppCompatActivity() {
+class IncomingCallActivity : BaseActivity() {
 
     companion object {
         var call: Call? = null
@@ -28,6 +28,7 @@ class IncomingCallActivity : AppCompatActivity() {
     private val binding: ActivityIncomingCallBinding
         get() = _binding
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityIncomingCallBinding.inflate(layoutInflater)
@@ -146,5 +147,19 @@ class IncomingCallActivity : AppCompatActivity() {
         if (ringtone.isPlaying) {
             ringtone.stop()
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent?.action == "ANSWER") {
+            dismissNotification()
+        } else if (intent?.action == "DECLINE") {
+            dismissNotification()
+        }
+    }
+
+    private fun dismissNotification() {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.cancel(1) // 1 is the notification ID
     }
 }

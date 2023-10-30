@@ -18,7 +18,8 @@ class PlayAudio : AppCompatActivity() {
         _binding = ActivityPlayAudioBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val file = intent.getStringExtra("filePath")
-
+        val audioName = file!!.substringAfter("CallRecordings/")
+        binding.txtAudioName.text = audioName
         try {
             mediaPlayer = MediaPlayer()
             mediaPlayer.setDataSource(file)

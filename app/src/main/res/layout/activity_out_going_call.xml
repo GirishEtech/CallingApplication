@@ -93,19 +93,20 @@
             android:id="@+id/btnCallHold"
             style="@style/CallFeatureStyle"
             android:layout_marginTop="12dp"
+            android:contentDescription="@string/app_name"
             android:foreground="@drawable/ripple_effect"
             android:src="@drawable/ic_pause"
-            app:layout_constraintEnd_toStartOf="@+id/btnCallRecord"
+            app:layout_constraintEnd_toStartOf="@+id/btnCallSound"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnAddCall"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/btnCallRecord"
+            android:id="@+id/btnCallSound"
             style="@style/CallFeatureStyle"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_record"
+            android:src="@drawable/ic_bluetooth"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnCallHold"
@@ -121,7 +122,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/btnCallMute"
-            app:layout_constraintTop_toBottomOf="@+id/btnCallRecord" />
+            app:layout_constraintTop_toBottomOf="@+id/btnCallSound" />
 
         <ImageButton
             android:id="@+id/btnCallMute"

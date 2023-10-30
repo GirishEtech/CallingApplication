@@ -48,7 +48,7 @@ class CallManager(
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
                 //${number.substringAfter("+91")}
-                val uri = Uri.parse("tel:+91${number.substringAfter("+91")}")
+                val uri = Uri.parse("tel:+9155132164")
                 telecomManager.placeCall(uri, test)
             } else {
                 Log.d(TAG, "account is not Available")

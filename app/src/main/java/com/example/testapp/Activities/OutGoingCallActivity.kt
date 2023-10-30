@@ -7,8 +7,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,22 +18,23 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.telecom.Call
+import android.telecom.TelecomManager
 import android.telecom.VideoProfile
 import android.util.Log
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.callingapp.Utils.Utils
+import com.example.testapp.Fragments.ModalBottomSheet
 import com.example.testapp.R
 import com.example.testapp.Utils.AudioRecorder
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
 import java.io.IOException
 
 
-class OutGoingCallActivity : AppCompatActivity() {
+class OutGoingCallActivity : BaseActivity() {
 
 
     private var btnOn: Int = 0
@@ -43,11 +42,11 @@ class OutGoingCallActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var totalSeconds = 0
     private val REQUEST_CODE = 0
-    private var mDPM: DevicePolicyManager? = null
-    private var mAdminName: ComponentName? = null
     lateinit var mediaRecorder: AudioRecorder
     lateinit var audioManager: AudioManager
     lateinit var outputPath: String
+    lateinit var buttomSheet: ModalBottomSheet
+    var isCallActive = false
 
     companion object {
         var call: Call? = null
@@ -75,31 +74,44 @@ class OutGoingCallActivity : AppCompatActivity() {
             Toast.makeText(this, "Audio Permission Denied", Toast.LENGTH_SHORT).show()
         } else {
             speakerManage()
-            createAdmin()
+            muteManage()
+            holdManage()
         }
     }
 
-    private fun createAdmin() {
-        try {
-            // Initiate DevicePolicyManager.
-            mDPM = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            mAdminName = ComponentName(this, OutGoingCallActivity::class.java)
-            if (!mDPM!!.isAdminActive(mAdminName!!)) {
-                val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mAdminName)
-                intent.putExtra(
-                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                    "Click on Activate button to secure your application."
-                )
-                startActivityForResult(intent, REQUEST_CODE)
+    private fun holdManage() {
+        var ishold = true
+        binding.btnCallHold.setOnClickListener {
+            if (ishold) {
+                binding.btnCallHold.imageTintList = ColorStateList.valueOf(btnOn)
+                call!!.hold()
+                Log.i(TAG, "initComponents: Call is Holding")
+                ishold = false
             } else {
-                // mDPM.lockNow();
-                // Intent intent = new Intent(MainActivity.this,
-                // TrackDeviceService.class);
-                // startService(intent);
+                binding.btnCallHold.imageTintList = ColorStateList.valueOf(btnOff)
+                call!!.unhold()
+                call!!.playDtmfTone('1')
+                call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
+                Log.i(TAG, "initComponents: call is unholding")
+                ishold = true
+
             }
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
+        }
+    }
+
+    private fun muteManage() {
+        var isPause = true
+        binding.btnCallMute.setOnClickListener {
+            if (isPause) {
+                binding.btnCallMute.imageTintList = ColorStateList.valueOf(btnOn)
+                isPause = false
+                getSystemService(AudioManager::class.java).isMicrophoneMute = true
+            } else {
+                binding.btnCallMute.imageTintList = ColorStateList.valueOf(btnOff)
+                getSystemService(AudioManager::class.java).isMicrophoneMute = false
+                isPause = true
+
+            }
         }
     }
 
@@ -107,8 +119,7 @@ class OutGoingCallActivity : AppCompatActivity() {
     @SuppressLint("ResourceType")
     private fun speakerManage() {
         try {
-            var isSpeakerOn = false
-            binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOn)
+            var isSpeakerOn = true
             binding.btnSpeaker.setOnClickListener {
                 if (isSpeakerOn) {
                     Log.i(TAG, "speakerManage: Speaker on ${audioManager.isSpeakerphoneOn}")
@@ -138,6 +149,7 @@ class OutGoingCallActivity : AppCompatActivity() {
                     Call.STATE_ACTIVE -> {
                         binding.txtCallingStatus.text = getString(R.string.lbl_active)
                         call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
+                        isCallActive = true
                         call.playDtmfTone('1')
                         startRecording()
                         startTimer()
@@ -172,6 +184,7 @@ class OutGoingCallActivity : AppCompatActivity() {
                         call!!.disconnect()
                         call.reject(Call.REJECT_REASON_DECLINED)
                         stopRecording()
+                        isCallActive = false
                         stopTimer()
                     }
 
@@ -272,7 +285,6 @@ class OutGoingCallActivity : AppCompatActivity() {
                         call!!.details.handle.schemeSpecificPart
                     )
                 )
-
                 if (outputFilePath == null) {
                     Toast.makeText(this, "File is Null", Toast.LENGTH_SHORT).show()
                 } else {
@@ -295,6 +307,7 @@ class OutGoingCallActivity : AppCompatActivity() {
     private fun initComponents() {
         btnOff = resources.getColor(android.R.color.black)
         btnOn = resources.getColor(R.color.SpeakerOn)
+        buttomSheet = ModalBottomSheet()
         setAnimation()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         mediaRecorder = AudioRecorder(this)
@@ -315,39 +328,18 @@ class OutGoingCallActivity : AppCompatActivity() {
                 if (call == null) {
                     startActivity(Intent(this, MainActivity::class.java))
                 } else {
-                    call!!.disconnect()
-                    //deleteEntry()
+                    if (isCallActive) {
+                        call!!.disconnect()
+                        startActivity(Intent(this, MainActivity::class.java))
+                    } else {
+                        getSystemService(TelecomManager::class.java).endCall()
+                        startActivity(Intent(this, MainActivity::class.java))
+                    }
                 }
             }
         }
-        var isPause = true
-        binding.btnCallMute.setOnClickListener {
-            if (isPause) {
-                binding.btnCallMute.imageTintList = ColorStateList.valueOf(btnOn)
-                isPause = false
-                call!!.stopDtmfTone()
-            } else {
-                binding.btnCallMute.imageTintList = ColorStateList.valueOf(btnOff)
-                isPause = true
-                call!!.playDtmfTone('1')
-            }
-        }
-        var ishold = true
-        binding.btnCallHold.setOnClickListener {
-            if (ishold) {
-                binding.btnCallHold.imageTintList = ColorStateList.valueOf(btnOn)
-                call!!.hold()
-                Log.i(TAG, "initComponents: Call is Holding")
-                ishold = false
-            } else {
-                binding.btnCallHold.imageTintList = ColorStateList.valueOf(btnOff)
-                call!!.unhold()
-                call!!.playDtmfTone('1')
-                call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
-                Log.i(TAG, "initComponents: call is unholding")
-                ishold = true
-
-            }
+        binding.btnAddCall.setOnClickListener {
+            buttomSheet.show(supportFragmentManager, ModalBottomSheet.TAG)
         }
 
     }

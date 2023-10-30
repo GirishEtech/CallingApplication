@@ -9,24 +9,24 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.telecom.TelecomManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.Models.Contact
 import com.example.testapp.databinding.ActivityMainBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
-class MainActivity : AppCompatActivity(), ContactAdapter.number {
+class MainActivity : BaseActivity(), ContactAdapter.number {
 
     var permissionsList: ArrayList<String>? = null
 
@@ -72,11 +72,12 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
         }
 
 
+    private var alertDialog: AlertDialog? = null
+    lateinit var items: List<Contact>
     lateinit var adapter: ContactAdapter
     val TAG = "MainActivity"
     private val REQUEST_ID: Int = 2
     lateinit var CallManager: CallManager
-    private val PERMISSION_REQUEST_CODE = 100
     lateinit var _binding: ActivityMainBinding
     val binding: ActivityMainBinding
         get() = _binding
@@ -87,9 +88,24 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         CallManager = CallManager(this)
-        requestRole()
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+            requestRole()
+        } else {
+            offerReplacingDefaultDialer()
+        }
         permissionsList = ArrayList()
         permissionsList!!.addAll(listOf(*permissionsStr))
+    }
+
+    private fun offerReplacingDefaultDialer() {
+        if (getSystemService(TelecomManager::class.java).defaultDialerPackage !== packageName) {
+            val ChangeDialer = Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
+            ChangeDialer.putExtra(
+                TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
+                packageName
+            )
+            startActivity(ChangeDialer)
+        }
     }
 
     private fun hasPermission(context: Context, permissionStr: String): Boolean {
@@ -99,43 +115,9 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    fun check(): Boolean {
-        val manageOwnCallsPermission =
-            ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_OWN_CALLS)
-        return if (manageOwnCallsPermission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    Manifest.permission.MANAGE_OWN_CALLS,
-                    Manifest.permission.READ_PHONE_NUMBERS,
-                    Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.ANSWER_PHONE_CALLS,
-                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                    Manifest.permission.READ_CALL_LOG,
-                    Manifest.permission.WRITE_CALL_LOG,
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.READ_CONTACTS,
-                    Manifest.permission.CAPTURE_AUDIO_OUTPUT,
-                    WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
-                PERMISSION_REQUEST_CODE
-            )
-            Toast.makeText(this, "manage Own Calls is not Granted", Toast.LENGTH_SHORT).show()
-
-            false
-        } else {
-            //createPhoneAccount()
-            Log.i(TAG, "check: Permission is Granted...")
-            displayData()
-            true
-        }
-    }
 
     @RequiresApi(Build.VERSION_CODES.Q)
     fun requestRole() {
-
         val roleManager = getSystemService(RoleManager::class.java)
         val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_DIALER)
         startActivityForResult(intent, REQUEST_ID)
@@ -167,6 +149,7 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
         if (items.isEmpty()) {
             binding.progressBar.visibility = View.VISIBLE
         } else {
+            this.items = items
             binding.progressBar.visibility = View.INVISIBLE
             adapter = ContactAdapter(
                 items, this
@@ -190,10 +173,10 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
 
     @RequiresApi(34)
     override fun passdata(data: Contact) {
-        CallManager.startOutgoingCall(data.number)
+        showAlertForNextStep("Information", "Are You sure you want Call", data.number)
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun askForPermissions(permissionsList: ArrayList<String>) {
         val newPermissionStr = arrayOfNulls<String>(permissionsList.size)
         for (i in newPermissionStr.indices) {
@@ -206,7 +189,6 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
         }
     }
 
-    var alertDialog: AlertDialog? = null
 
     private fun showPermissionDialog(title: String, messages: String) {
         val builder = AlertDialog.Builder(this)
@@ -219,6 +201,23 @@ class MainActivity : AppCompatActivity(), ContactAdapter.number {
                 alertDialog!!.show()
             }
         }
+    }
+
+    @RequiresApi(34)
+    private fun showAlertForNextStep(title: String, messages: String, number: String) {
+        MaterialAlertDialogBuilder(this).setMessage(messages)
+            .setTitle(title)
+            .setPositiveButton(
+                "Ok"
+            ) { dialog, which ->
+                CallManager.startOutgoingCall(number)
+            }
+            .setNegativeButton(
+                "Cencel"
+            ) { dialog, which ->
+
+                dialog.dismiss()
+            }.show()
     }
 
 }

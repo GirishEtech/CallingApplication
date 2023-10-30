@@ -20,9 +20,12 @@ class AudioRecorder(val context: Context) {
     fun startRecording(outputFile: File) {
         try {
             val Media = MediaRecorder.AudioSource.VOICE_UPLINK
-            mediaRecorder.setAudioSource(Media)
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
+//            mediaRecorder.setAudioSource(Media)
+//            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+//            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB)
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
             mediaRecorder.setOutputFile(outputFile)
             mediaRecorder.prepare()
             mediaRecorder.start() // Start recording
@@ -43,3 +46,5 @@ class AudioRecorder(val context: Context) {
     }
 
 }
+
+
