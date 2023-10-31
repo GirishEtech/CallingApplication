@@ -4,7 +4,6 @@ import android.Manifest
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.role.RoleManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -15,7 +14,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import com.example.callingapp.Utils.Utils
@@ -23,7 +21,6 @@ import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.Models.Contact
 import com.example.testapp.databinding.ActivityMainBinding
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
 class MainActivity : BaseActivity(), ContactAdapter.number {
@@ -62,7 +59,7 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
                 askForPermissions(permissionsList!!)
 
             } else if (permissionsCount > 0) {
-                showPermissionDialog("PERMISSION", "permission is required")
+                Utils.showPermissionDialog(this, "PERMISSION", "permission is required")
 
             } else {
                 Toast.makeText(this, "All Permission is Granted", Toast.LENGTH_SHORT).show()
@@ -72,7 +69,6 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
         }
 
 
-    private var alertDialog: AlertDialog? = null
     lateinit var items: List<Contact>
     lateinit var adapter: ContactAdapter
     val TAG = "MainActivity"
@@ -173,7 +169,7 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
 
     @RequiresApi(34)
     override fun passdata(data: Contact) {
-        showAlertForNextStep("Information", "Are You sure you want Call", data.number)
+        Utils.showAlertForNextStep(this, "Information", "Are You sure you want Call", data.number)
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -185,39 +181,9 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
         if (newPermissionStr.isNotEmpty()) {
             permissionLaunder.launch(newPermissionStr as Array<String>)
         } else {
-            showPermissionDialog("PERMISSION", "Permission is Empty")
+            Utils.showPermissionDialog(this, "PERMISSION", "Permission is Empty")
         }
     }
 
-
-    private fun showPermissionDialog(title: String, messages: String) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle(title)
-            .setMessage(messages)
-            .setPositiveButton("Ok") { dialog: DialogInterface, _: Int -> dialog.dismiss() }
-        if (alertDialog == null) {
-            alertDialog = builder.create()
-            if (!alertDialog!!.isShowing) {
-                alertDialog!!.show()
-            }
-        }
-    }
-
-    @RequiresApi(34)
-    private fun showAlertForNextStep(title: String, messages: String, number: String) {
-        MaterialAlertDialogBuilder(this).setMessage(messages)
-            .setTitle(title)
-            .setPositiveButton(
-                "Ok"
-            ) { dialog, which ->
-                CallManager.startOutgoingCall(number)
-            }
-            .setNegativeButton(
-                "Cencel"
-            ) { dialog, which ->
-
-                dialog.dismiss()
-            }.show()
-    }
 
 }

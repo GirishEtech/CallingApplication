@@ -288,8 +288,9 @@ class OutGoingCallActivity : BaseActivity() {
                 if (outputFilePath == null) {
                     Toast.makeText(this, "File is Null", Toast.LENGTH_SHORT).show()
                 } else {
-                    mediaRecorder.startRecording(outputFilePath)
+                    mediaRecorder.startRecording(outputFilePath, this)
                     this.outputPath = outputFilePath.absolutePath
+                    Log.i(TAG, "startRecording: File Path :$outputFilePath")
                 }
 
                 Toast.makeText(this, "Recording is Started", Toast.LENGTH_SHORT).show()

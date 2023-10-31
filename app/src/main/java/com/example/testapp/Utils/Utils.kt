@@ -2,13 +2,18 @@ package com.example.callingapp.Utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
 import android.provider.ContactsContract
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
+import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.Models.Contact
 import com.example.testapp.Utils.DatabaseHelper
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.io.File
@@ -18,6 +23,7 @@ import java.io.IOException
 class Utils {
 
     companion object {
+        var alertDialog: AlertDialog? = null
         private val TAG = "Utils"
         var count = 0
 
@@ -66,6 +72,42 @@ class Utils {
                 return db.getAllContacts()
             }
             return ArrayList()
+        }
+
+        fun showPermissionDialog(context: Context, title: String, messages: String) {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(title)
+                .setMessage(messages)
+                .setPositiveButton("Ok") { dialog: DialogInterface, _: Int -> dialog.dismiss() }
+            if (alertDialog == null) {
+                alertDialog = builder.create()
+                if (!alertDialog!!.isShowing) {
+                    alertDialog!!.show()
+                }
+            }
+        }
+
+        @RequiresApi(34)
+        fun showAlertForNextStep(
+            context: Context,
+            title: String,
+            messages: String,
+            number: String
+        ) {
+            MaterialAlertDialogBuilder(context).setMessage(messages)
+                .setTitle(title)
+                .setPositiveButton(
+                    "Ok"
+                ) { dialog, which ->
+                    val manager = CallManager(context)
+                    manager.startOutgoingCall(number)
+                }
+                .setNegativeButton(
+                    "Cencel"
+                ) { dialog, which ->
+
+                    dialog.dismiss()
+                }.show()
         }
 
         @SuppressLint("Range")
