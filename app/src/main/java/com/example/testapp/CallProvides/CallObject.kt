@@ -17,6 +17,10 @@ import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class CallObject(val context: Context) {
 
+    init {
+        ANOTHERC_CALL = ArrayList()
+    }
+
     val notificationManager = com.example.testapp.Utils.NotificationManager(context)
     private val LOG_TAG = "CallObject"
     private val subject = BehaviorSubject.create<Call>()
@@ -85,7 +89,6 @@ class CallObject(val context: Context) {
                     CURRENT_CALL = call
                     currentCall = call
                 } else {
-                    ANOTHERC_CALL = ArrayList()
                     ANOTHERC_CALL!!.add(call)
                     anotherCall = call
                 }

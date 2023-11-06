@@ -50,7 +50,7 @@ class CallManager(
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
                 //${number.substringAfter("+91")}
-                val uri = Uri.parse("tel:+916498894")
+                val uri = Uri.parse("tel:+91${number.substringAfter("+91")}")
                 telecomManager.placeCall(uri, test)
             } else {
                 Log.d(TAG, "account is not Available")
@@ -139,9 +139,11 @@ class CallManager(
     }
 
     fun mergeConference() {
-        for (anotherCall in CallObject.ANOTHERC_CALL!!) {
-            CallObject.CURRENT_CALL!!.conference(anotherCall)
-            //CallObject.CURRENT_CALL.mergeConference()
-        }
+        if (CallObject.ANOTHERC_CALL != null) {
+            for (anotherCall in CallObject.ANOTHERC_CALL!!) {
+                //CallObject.CURRENT_CALL!!.conference(anotherCall)
+                CallObject.CURRENT_CALL!!.mergeConference()
+            }
+        } else Log.i(TAG, "mergeConference: NULL OBJECT")
     }
 }

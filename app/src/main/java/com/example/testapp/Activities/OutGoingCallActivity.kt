@@ -111,10 +111,6 @@ class OutGoingCallActivity : BaseActivity() {
 
         checkBluetoothPermission()
         val bAdapter = BluetoothAdapter.getDefaultAdapter()
-        if (!Utils.getDeviceIsConnected()) {
-            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-            startActivity(intent)
-        }
         binding.btnCallSound.setOnClickListener {
             if (isSpeakeron) {
                 binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOff)
@@ -126,6 +122,10 @@ class OutGoingCallActivity : BaseActivity() {
                 bAdapter.disable()
                 isBluetoothon = false
             } else {
+                if (!Utils.getDeviceIsConnected()) {
+                    val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                    startActivity(intent)
+                }
                 callManager.setOutput(OutputDevice.BLUETOOTH)
                 binding.btnCallSound.imageTintList = ColorStateList.valueOf(btnOn)
                 Log.d(TAG, "bluetoothManage: bluetooth is ON")
@@ -267,11 +267,9 @@ class OutGoingCallActivity : BaseActivity() {
                         isCallActive = false
                         stopTimer()
                         preferenceManager.setConference(false)
-                        startActivity(Intent(this@OutGoingCallActivity, MainActivity::class.java))
-                        callList.remoteLast()
+                        callList.deleteAll()
+                        adapter.notifyDataSetChanged()
                         finish()
-
-
                     }
 
                     Call.STATE_DISCONNECTING -> {
@@ -388,15 +386,26 @@ class OutGoingCallActivity : BaseActivity() {
             ) {
                 Toast.makeText(this, "Permission is not Granted", Toast.LENGTH_SHORT).show()
             } else {
+                val Number = CallObject.CURRENT_CALL!!.details.handle.schemeSpecificPart
                 if (Currentcall == null) {
-                    startActivity(Intent(this, MainActivity::class.java))
+
+                    startActivity(Intent(this, ReCallingActivity::class.java).apply {
+                        putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
+                        putExtra("NUMBER", Number)
+                    })
                 } else {
                     if (isCallActive) {
                         Currentcall!!.disconnect()
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, ReCallingActivity::class.java).apply {
+                            putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
+                            putExtra("NUMBER", Number)
+                        })
                     } else {
                         getSystemService(TelecomManager::class.java).endCall()
-                        startActivity(Intent(this, MainActivity::class.java))
+                        startActivity(Intent(this, ReCallingActivity::class.java).apply {
+                            putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
+                            putExtra("NUMBER", Number)
+                        })
                     }
                 }
             }
