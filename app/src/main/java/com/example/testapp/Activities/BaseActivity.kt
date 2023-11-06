@@ -6,10 +6,11 @@ import com.example.testapp.PreferenceManager
 
 open class BaseActivity : AppCompatActivity() {
     lateinit var preferenceManager: PreferenceManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         preferenceManager = PreferenceManager(this)
-
+        preferenceManager.setConference(false)
     }
 
     override fun onPause() {
@@ -23,5 +24,8 @@ open class BaseActivity : AppCompatActivity() {
 
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        preferenceManager.setConference(false)
+    }
 }

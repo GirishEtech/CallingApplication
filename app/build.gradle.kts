@@ -55,4 +55,14 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("androidx.security:security-crypto:1.0.0")
 
+
+    // RxJava bindings for the Places SDK
+    implementation("com.google.maps.android:places-rx:1.0.0")
+    implementation("com.google.maps.android:maps-rx:1.0.0")
+    // It is recommended to also include the latest Maps SDK, Places SDK and RxJava so you
+    // have the latest features and bug fixes.
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.libraries.places:places:3.2.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+
 }

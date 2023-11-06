@@ -10,12 +10,14 @@ import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.telecom.CallAudioState
 import android.telecom.PhoneAccount
 import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.testapp.R
+import com.example.testapp.Utils.OutputDevice
 
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -48,7 +50,7 @@ class CallManager(
             Log.i(TAG, "startOutgoingCall: isAble to Call :$isCallableAccount")
             if (account != null) {
                 //${number.substringAfter("+91")}
-                val uri = Uri.parse("tel:+91${number.substringAfter("+91")}")
+                val uri = Uri.parse("tel:+916498894")
                 telecomManager.placeCall(uri, test)
             } else {
                 Log.d(TAG, "account is not Available")
@@ -85,7 +87,7 @@ class CallManager(
             "${R.string.app_name}"
         )
             .setCapabilities(
-                PhoneAccount.CAPABILITY_CALL_PROVIDER
+                PhoneAccount.CAPABILITY_CALL_PROVIDER and PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING and PhoneAccount.CAPABILITY_CALL_SUBJECT
             )
             .setIcon(Icon.createWithResource(context, R.drawable.ic_call))
             .setShortDescription("${R.string.app_name}")
@@ -105,5 +107,41 @@ class CallManager(
         context.startActivity(intent)
     }
 
+    fun setOutput(outputType: OutputDevice) {
+        val service = MyInCallService.INSTANCE
+        when (outputType) {
+            OutputDevice.SPEAKER -> {
+                service!!.setAudioRoute(CallAudioState.ROUTE_SPEAKER)
+            }
 
+            OutputDevice.EARPIECE -> {
+                service!!.setAudioRoute(CallAudioState.ROUTE_EARPIECE)
+            }
+
+            OutputDevice.BLUETOOTH -> {
+                service!!.setAudioRoute(CallAudioState.ROUTE_BLUETOOTH)
+            }
+
+            else -> {
+                Log.i(TAG, "setOutput: invalid Output Device")
+            }
+        }
+    }
+
+    fun getDefault(): CallAudioState? {
+        val service = MyInCallService.INSTANCE
+        return service!!.callAudioState
+    }
+
+    fun setMute(mute: Boolean) {
+        val service = MyInCallService.INSTANCE
+        service!!.setMuted(mute)
+    }
+
+    fun mergeConference() {
+        for (anotherCall in CallObject.ANOTHERC_CALL!!) {
+            CallObject.CURRENT_CALL!!.conference(anotherCall)
+            //CallObject.CURRENT_CALL.mergeConference()
+        }
+    }
 }

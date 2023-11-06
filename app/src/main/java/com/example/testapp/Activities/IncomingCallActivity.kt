@@ -12,6 +12,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.callingapp.Utils.Utils
+import com.example.testapp.CallProvides.CallObject
 import com.example.testapp.databinding.ActivityIncomingCallBinding
 
 
@@ -120,7 +121,7 @@ class IncomingCallActivity : BaseActivity() {
         startDefaultRingtone()
         binding.btnCallAccept.setOnClickListener {
             if (call != null) {
-                OutGoingCallActivity.call = call
+                CallObject.CURRENT_CALL = call
                 call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
                 call!!.playDtmfTone('1')
                 startActivity(Intent(this, OutGoingCallActivity::class.java))

@@ -7,7 +7,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.content.Context
+import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -17,7 +17,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.telecom.Call
+import android.telecom.CallAudioState
 import android.telecom.TelecomManager
 import android.telecom.VideoProfile
 import android.util.Log
@@ -27,33 +29,39 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.callingapp.Utils.Utils
+import com.example.testapp.Adapter.CallAdapter
+import com.example.testapp.CallProvides.CallManager
+import com.example.testapp.CallProvides.CallObject
 import com.example.testapp.Fragments.ModalBottomSheet
+import com.example.testapp.Models.CallModel
 import com.example.testapp.R
-import com.example.testapp.Utils.AudioRecorder
+import com.example.testapp.Utils.CallList
+import com.example.testapp.Utils.NotificationManager
+import com.example.testapp.Utils.OutputDevice
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
-import java.io.IOException
 
 
 class OutGoingCallActivity : BaseActivity() {
 
-
+    lateinit var callList: CallList
+    lateinit var notificationManager: NotificationManager
+    lateinit var callAudioState: CallAudioState
+    private lateinit var callManager: CallManager
     private var btnOn: Int = 0
     private var btnOff = 0
     private val handler = Handler(Looper.getMainLooper())
     private var totalSeconds = 0
     private val REQUEST_CODE = 0
-    lateinit var mediaRecorder: AudioRecorder
-    lateinit var audioManager: AudioManager
-    lateinit var outputPath: String
-    lateinit var buttomSheet: ModalBottomSheet
+    private var isBluetoothon = false
+    private var isSpeakeron = false
+    lateinit var adapter: CallAdapter
+    private lateinit var audioManager: AudioManager
+    private lateinit var buttomSheet: ModalBottomSheet
     var isCallActive = false
-
-    companion object {
-        var call: Call? = null
-    }
+    var Currentcall: Call? = null
 
     val TAG = "OutGoingCallActivity"
-    lateinit var _binding: ActivityOutGoingCallBinding
+    private lateinit var _binding: ActivityOutGoingCallBinding
     val binding: ActivityOutGoingCallBinding
         get() = _binding
 
@@ -63,9 +71,6 @@ class OutGoingCallActivity : BaseActivity() {
         _binding = ActivityOutGoingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initComponents()
-        if (call != null) {
-            callBack()
-        }
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.MODIFY_AUDIO_SETTINGS
@@ -73,9 +78,77 @@ class OutGoingCallActivity : BaseActivity() {
         ) {
             Toast.makeText(this, "Audio Permission Denied", Toast.LENGTH_SHORT).show()
         } else {
+            setDefault()
+            bluetoothManage()
             speakerManage()
             muteManage()
             holdManage()
+        }
+    }
+
+    private fun setDefault() {
+        when (callAudioState.route) {
+            CallAudioState.ROUTE_BLUETOOTH -> {
+                binding.btnCallSound.imageTintList = ColorStateList.valueOf(btnOn)
+                isBluetoothon = true
+            }
+
+            CallAudioState.ROUTE_SPEAKER -> {
+                binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOn)
+                isSpeakeron = true
+            }
+
+            else -> {
+
+            }
+        }
+
+    }
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun bluetoothManage() {
+
+        checkBluetoothPermission()
+        val bAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (!Utils.getDeviceIsConnected()) {
+            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+            startActivity(intent)
+        }
+        binding.btnCallSound.setOnClickListener {
+            if (isSpeakeron) {
+                binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOff)
+            }
+            if (isBluetoothon) {
+                callManager.setOutput(OutputDevice.EARPIECE)
+                binding.btnCallSound.imageTintList = ColorStateList.valueOf(btnOff)
+                Log.d(TAG, "bluetoothManage: bluetooth is OFF")
+                bAdapter.disable()
+                isBluetoothon = false
+            } else {
+                callManager.setOutput(OutputDevice.BLUETOOTH)
+                binding.btnCallSound.imageTintList = ColorStateList.valueOf(btnOn)
+                Log.d(TAG, "bluetoothManage: bluetooth is ON")
+                bAdapter.enable()
+                isBluetoothon = true
+            }
+        }
+    }
+
+    private fun checkBluetoothPermission(): Boolean {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.BLUETOOTH_CONNECT),
+                1
+            )
+            return false
+        } else {
+            return true
         }
     }
 
@@ -84,54 +157,62 @@ class OutGoingCallActivity : BaseActivity() {
         binding.btnCallHold.setOnClickListener {
             if (ishold) {
                 binding.btnCallHold.imageTintList = ColorStateList.valueOf(btnOn)
-                call!!.hold()
                 Log.i(TAG, "initComponents: Call is Holding")
                 ishold = false
+                Currentcall!!.hold()
             } else {
                 binding.btnCallHold.imageTintList = ColorStateList.valueOf(btnOff)
-                call!!.unhold()
-                call!!.playDtmfTone('1')
-                call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
+                Currentcall!!.unhold()
                 Log.i(TAG, "initComponents: call is unholding")
                 ishold = true
-
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun muteManage() {
         var isPause = true
         binding.btnCallMute.setOnClickListener {
+            if (isBluetoothon) {
+                binding.btnCallSound.imageTintList = ColorStateList.valueOf(btnOff)
+            } else if (isSpeakeron) {
+                binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOff)
+            }
             if (isPause) {
+                callManager.setMute(true)
+
                 binding.btnCallMute.imageTintList = ColorStateList.valueOf(btnOn)
                 isPause = false
-                getSystemService(AudioManager::class.java).isMicrophoneMute = true
             } else {
+                callManager.setMute(false)
                 binding.btnCallMute.imageTintList = ColorStateList.valueOf(btnOff)
-                getSystemService(AudioManager::class.java).isMicrophoneMute = false
                 isPause = true
-
             }
         }
     }
 
 
-    @SuppressLint("ResourceType")
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @SuppressLint("ResourceType", "MissingPermission")
     private fun speakerManage() {
+        // audioManager.requestAudioFocus(getAudioFocusRequest())
         try {
-            var isSpeakerOn = true
+            var isOn = (callAudioState.route == CallAudioState.ROUTE_SPEAKER)
             binding.btnSpeaker.setOnClickListener {
-                if (isSpeakerOn) {
+                if (isBluetoothon) {
+                    binding.btnCallSound.imageTintList = ColorStateList.valueOf(btnOff)
+                }
+                if (!isOn) {
                     Log.i(TAG, "speakerManage: Speaker on ${audioManager.isSpeakerphoneOn}")
-                    isSpeakerOn = false
-                    audioManager.mode = AudioManager.MODE_IN_CALL
-                    audioManager.isSpeakerphoneOn = true
+                    isOn = true
+                    callManager.setOutput(OutputDevice.SPEAKER)
+                    isSpeakeron = true
                     binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOn)
                 } else {
                     Log.i(TAG, "speakerManage: Speaker off ${audioManager.isSpeakerphoneOn}")
-                    isSpeakerOn = true
-                    audioManager.mode = AudioManager.MODE_NORMAL
-                    audioManager.isSpeakerphoneOn = false
+                    isOn = false
+                    callManager.setOutput(OutputDevice.EARPIECE)
+                    isSpeakeron = false
                     binding.btnSpeaker.imageTintList = ColorStateList.valueOf(btnOff)
                 }
             }
@@ -142,7 +223,7 @@ class OutGoingCallActivity : BaseActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun callBack() {
-        call!!.registerCallback(object : Call.Callback() {
+        Currentcall!!.registerCallback(object : Call.Callback() {
             override fun onStateChanged(call: Call?, state: Int) {
                 super.onStateChanged(call, state)
                 when (state) {
@@ -151,8 +232,8 @@ class OutGoingCallActivity : BaseActivity() {
                         call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
                         isCallActive = true
                         call.playDtmfTone('1')
-                        startRecording()
                         startTimer()
+                        adapter.notifyDataSetChanged()
                     }
 
                     Call.STATE_AUDIO_PROCESSING -> {
@@ -183,9 +264,14 @@ class OutGoingCallActivity : BaseActivity() {
                     Call.STATE_DISCONNECTED -> {
                         call!!.disconnect()
                         call.reject(Call.REJECT_REASON_DECLINED)
-                        stopRecording()
                         isCallActive = false
                         stopTimer()
+                        preferenceManager.setConference(false)
+                        startActivity(Intent(this@OutGoingCallActivity, MainActivity::class.java))
+                        callList.remoteLast()
+                        finish()
+
+
                     }
 
                     Call.STATE_DISCONNECTING -> {
@@ -203,6 +289,7 @@ class OutGoingCallActivity : BaseActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                         call!!.hold()
+                        binding.txtCallingStatus.text = "Hold"
                     }
 
                     Call.STATE_NEW -> {
@@ -244,18 +331,6 @@ class OutGoingCallActivity : BaseActivity() {
         })
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun stopRecording() {
-        try {
-            mediaRecorder.stopRecording()
-            Toast.makeText(this, "audio is Recorded", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this@OutGoingCallActivity, PlayAudio::class.java)
-            intent.putExtra("filePath", outputPath)
-            startActivity(intent)
-        } catch (ex: Exception) {
-            Log.i(TAG, "stopRecording:${ex.message}")
-        }
-    }
 
     private fun requestAudioPermission(): Boolean {
         if (ContextCompat.checkSelfPermission(
@@ -275,48 +350,35 @@ class OutGoingCallActivity : BaseActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun startRecording() {
-        if (requestAudioPermission()) {
-            try {
-                val outputFilePath = Utils.getRecordingFile(
-                    Utils.getCallerName(
-                        this,
-                        call!!.details.handle.schemeSpecificPart
-                    )
-                )
-                if (outputFilePath == null) {
-                    Toast.makeText(this, "File is Null", Toast.LENGTH_SHORT).show()
-                } else {
-                    mediaRecorder.startRecording(outputFilePath, this)
-                    this.outputPath = outputFilePath.absolutePath
-                    Log.i(TAG, "startRecording: File Path :$outputFilePath")
-                }
-
-                Toast.makeText(this, "Recording is Started", Toast.LENGTH_SHORT).show()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        } else {
-            Log.e(TAG, "startRecording: Record Audio is Denied")
-        }
-
-    }
-
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun initComponents() {
+        Log.i(TAG, "initComponents: Activity is Rebuild...")
+        callList = CallList()
+        adapter = CallAdapter(callList.getAllData())
+        Currentcall = CallObject.CURRENT_CALL
+        notificationManager = NotificationManager(this)
+        if (intent.action == "${packageName}.ANSWER") {
+            notificationManager.dismiss()
+            Currentcall!!.answer(VideoProfile.STATE_AUDIO_ONLY)
+        }
         btnOff = resources.getColor(android.R.color.black)
         btnOn = resources.getColor(R.color.SpeakerOn)
         buttomSheet = ModalBottomSheet()
         setAnimation()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
-        mediaRecorder = AudioRecorder(this)
-        if (call != null) {
-            val name = Utils.getCallerName(this, call!!.details.handle.schemeSpecificPart)
-            val number = call!!.details.handle.schemeSpecificPart
-            binding.TxtCallName.text = name
-            binding.TxtCallerNumber.text = number
+        callManager = CallManager(this)
+        callAudioState = callManager.getDefault()!!
+        if (Currentcall != null && preferenceManager.getConference()) {
+            adapter.notifyDataSetChanged()
+            callBack()
+        } else {
+            if (Currentcall != null) {
+                callList.addItem(CallModel(Currentcall!!, true, false))
+                callBack()
+            }
+            binding.callList.adapter = adapter
+            preferenceManager.setConference(false)
         }
         binding.btnCallend.setOnClickListener {
             if (ActivityCompat.checkSelfPermission(
@@ -326,11 +388,11 @@ class OutGoingCallActivity : BaseActivity() {
             ) {
                 Toast.makeText(this, "Permission is not Granted", Toast.LENGTH_SHORT).show()
             } else {
-                if (call == null) {
+                if (Currentcall == null) {
                     startActivity(Intent(this, MainActivity::class.java))
                 } else {
                     if (isCallActive) {
-                        call!!.disconnect()
+                        Currentcall!!.disconnect()
                         startActivity(Intent(this, MainActivity::class.java))
                     } else {
                         getSystemService(TelecomManager::class.java).endCall()
@@ -342,7 +404,6 @@ class OutGoingCallActivity : BaseActivity() {
         binding.btnAddCall.setOnClickListener {
             buttomSheet.show(supportFragmentManager, ModalBottomSheet.TAG)
         }
-
     }
 
     @SuppressLint("ObjectAnimatorBinding")
@@ -370,18 +431,12 @@ class OutGoingCallActivity : BaseActivity() {
         animatorSet.start() // Start the animation
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (REQUEST_CODE == requestCode) {
             Toast.makeText(this, "Now Your granted to record Calls", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun hasPermission(context: Context, permissionStr: String): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            permissionStr
-        ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun stopTimer() {
@@ -394,14 +449,11 @@ class OutGoingCallActivity : BaseActivity() {
                 val h = totalSeconds / 3600
                 val m = (totalSeconds % 3600) / 60
                 val s = totalSeconds % 60
-
                 binding.txtCallingStatus.text = String.format("%02d:%02d:%02d", h, m, s)
-
                 totalSeconds++
                 handler.postDelayed(this, 1000)  // Update every second
             }
         })
     }
-
 
 }

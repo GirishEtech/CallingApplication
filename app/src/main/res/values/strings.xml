@@ -9,5 +9,11 @@
     <string name="lbl_calling">Calling..</string>
     <string name="lbl_active">Active</string>
     <string name="lbl_dialing">Dialing</string>
-    <string name="lblsearchhint">Search...</string>
+    <string name="lblsearchhint">Search…</string>
+    <string name="lblhold">hold</string>
+    <string name="lbladd">Add call</string>
+    <string name="lblbluetooth">bluetooth</string>
+    <string name="lblspeaker">Speaker</string>
+    <string name="lblmute">Mute</string>
+    <string name="lblDial">Dial</string>
 </resources>

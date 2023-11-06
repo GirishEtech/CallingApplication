@@ -40,6 +40,7 @@
         android:layout_marginBottom="295dp"
         android:indeterminate="true"
         android:indeterminateTint="@android:color/holo_green_dark"
+        android:requiresFadingEdge="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"

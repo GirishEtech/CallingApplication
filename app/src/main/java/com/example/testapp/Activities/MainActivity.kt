@@ -2,6 +2,7 @@ package com.example.testapp.Activities
 
 import android.Manifest
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.annotation.SuppressLint
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
@@ -16,10 +17,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import com.example.callingapp.Utils.Messages
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.Models.Contact
+import com.example.testapp.Utils.NotificationManager
 import com.example.testapp.databinding.ActivityMainBinding
 
 
@@ -59,7 +62,7 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
                 askForPermissions(permissionsList!!)
 
             } else if (permissionsCount > 0) {
-                Utils.showPermissionDialog(this, "PERMISSION", "permission is required")
+                Messages.showPermissionDialog(this, "PERMISSION", "permission is required")
 
             } else {
                 Toast.makeText(this, "All Permission is Granted", Toast.LENGTH_SHORT).show()
@@ -78,11 +81,19 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
     val binding: ActivityMainBinding
         get() = _binding
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if (intent!!.action == "${packageName}.DECLINE") {
+            val telecomManager = getSystemService(TelecomManager::class.java)
+            val notificationManager = NotificationManager(this)
+            notificationManager.dismiss()
+            telecomManager.endCall()
+            finishAffinity()
+        }
         CallManager = CallManager(this)
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
             requestRole()
@@ -169,7 +180,12 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
 
     @RequiresApi(34)
     override fun passdata(data: Contact) {
-        Utils.showAlertForNextStep(this, "Information", "Are You sure you want Call", data.number)
+        Messages.showAlertForNextStep(
+            this,
+            "Information",
+            "Are You sure you want Call",
+            data.number
+        )
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -181,7 +197,7 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
         if (newPermissionStr.isNotEmpty()) {
             permissionLaunder.launch(newPermissionStr as Array<String>)
         } else {
-            Utils.showPermissionDialog(this, "PERMISSION", "Permission is Empty")
+            Messages.showPermissionDialog(this, "PERMISSION", "Permission is Empty")
         }
     }
 

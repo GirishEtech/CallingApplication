@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="bg_CallFunction">#9FFFFFFF</color>
     <color name="SpeakerOn">#1131E3</color>
+    <color name="iconColor">#2E3145</color>
 </resources>

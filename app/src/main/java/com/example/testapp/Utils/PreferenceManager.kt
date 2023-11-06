@@ -26,5 +26,14 @@ class PreferenceManager(context: Context) {
         editor.commit()
     }
 
+    fun setConference(value: Boolean) {
+        editor.putBoolean("isConference", value)
+        save()
+    }
+
+    fun getConference(): Boolean {
+        val conference = preference.getBoolean("isConference", false)
+        return conference
+    }
 
 }

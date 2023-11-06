@@ -6,8 +6,11 @@
         android:name="android.hardware.telephony"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_AUDIO_OUTPUT" />
     <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
@@ -26,9 +29,8 @@
         android:name="android.permission.CAPTURE_MEDIA_OUTPUT"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.STORAGE" />
-    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
     <uses-permission
-        android:name="android.permission.CONTROL_INCALL_EXPERIENCE"
+        android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
         tools:ignore="ProtectedPermissions" />
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -41,9 +43,6 @@
         android:roundIcon="@mipmap/ic_main_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CallingApp">
-        <activity
-            android:name=".Activities.PlayAudio"
-            android:exported="false" />
         <activity
             android:name=".Activities.OutGoingCallActivity"
             android:exported="false" />
@@ -115,6 +114,7 @@
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>

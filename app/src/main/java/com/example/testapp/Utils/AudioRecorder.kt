@@ -3,82 +3,66 @@ package com.example.testapp.Utils
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
-import android.media.AudioRecord
+import android.content.pm.PackageManager
 import android.media.MediaRecorder
+import android.media.MediaRecorder.AudioSource.*
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import com.example.callingapp.Utils.Utils
-import com.example.testapp.Activities.OutGoingCallActivity
+import androidx.core.content.ContextCompat
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
 
 
 @SuppressLint("MissingPermission")
 @RequiresApi(Build.VERSION_CODES.S)
 class AudioRecorder(val context: Context) {
     val TAG = "AudioRecorder"
-    var isError = false
-    private var recorder: AudioRecord? = null
-    private var outputStream: OutputStream? = null
     private var mediaRecorder: MediaRecorder? = null
+    private val minBuffSize = 44000
 
     init {
-
-        try {
-            Log.i(TAG, "Recording Is Init....")
-            mediaRecorder =
-                MediaRecorder()
-        } catch (ex: Exception) {
-            isError = true
-            Utils.showPermissionDialog(context, "ERROR", ex.toString())
-        }
+        mediaRecorder =
+            MediaRecorder(context)
     }
 
-    fun startRecording(outputFile: File, activity: OutGoingCallActivity) {
-        try {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.CAPTURE_AUDIO_OUTPUT),
-                1
-            )
-            mediaRecorder!!.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL)
-            mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-            mediaRecorder!!.setOutputFile(outputFile)
-            mediaRecorder!!.prepare()
-            mediaRecorder!!.start() // Start recording
+    @SuppressLint("WrongConstant")
+    fun startRecording(outputFile: File) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            try {
+                val source =
+                    VOICE_RECOGNITION
+                mediaRecorder!!.setAudioSource(source)
+                mediaRecorder!!.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                mediaRecorder!!.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+                mediaRecorder!!.setOutputFile(outputFile)
+                mediaRecorder!!.prepare()
+                mediaRecorder!!.start() // Start recording
 
-        } catch (ex: Exception) {
-            Log.d(TAG, "startRecording: ERROR :${ex}")
+            } catch (ex: Exception) {
+                Log.d(TAG, "startRecording: ERROR :${ex}")
+            }
+        } else {
+            Log.e(TAG, "startRecording: Permission for Recording Audio is not Granted")
         }
+
     }
 
-
-    private fun saveRecordingFile(audioData: ByteArray, directory: File) {
-
-        val audioFile = File(directory, "call_recording.wav")
-        try {
-            val outputStream = FileOutputStream(audioFile)
-            outputStream.write(audioData)
-            outputStream.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
 
     fun stopRecording() {
         try {
             mediaRecorder!!.release()
             mediaRecorder!!.reset()
             mediaRecorder!!.stop()
+
         } catch (Ex: Exception) {
             Log.e(TAG, "stopRecording: Error $Ex")
         }
     }
+
 
 }
 

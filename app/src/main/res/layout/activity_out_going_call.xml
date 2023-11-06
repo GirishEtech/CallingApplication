@@ -17,7 +17,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TxtCallerNumber"
+        app:layout_constraintTop_toBottomOf="@+id/callList"
         app:layout_constraintVertical_bias="0.156" />
 
     <ImageButton
@@ -35,37 +35,24 @@
         app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/TxtCallName"
-        style="@style/H1Style"
-        android:gravity="center"
-        android:text="@string/lblcaller_name"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.15" />
 
-    <TextView
-        android:id="@+id/TxtCallerNumber"
-        style="@style/H2Style"
-        android:gravity="center"
-        android:text="@string/lblCallerNumber"
-        android:textColor="#1E0D0D"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/callList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_30sdp"
+        android:layout_marginTop="36dp"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.506"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.19999999" />
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/_200sdp"
+        android:layout_height="@dimen/_220sdp"
         android:layout_margin="@dimen/_10ssp"
         android:background="@drawable/calling_bg"
         android:padding="@dimen/_20ssp"
@@ -73,82 +60,146 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TxtCallerNumber"
+        app:layout_constraintTop_toBottomOf="@+id/txtCallingStatus"
         app:layout_constraintVertical_bias="0.636">
 
-        <ImageButton
-            android:id="@+id/btnAddCall"
-            style="@style/CallFeatureStyle"
+        <LinearLayout
+            android:id="@+id/layoutAdd"
+            style="@style/CallingBtnParentStyle"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
-            android:foreground="@drawable/ripple_effect"
-            android:src="@drawable/ic_add"
-            app:layout_constraintEnd_toStartOf="@+id/btnCallHold"
+            app:layout_constraintEnd_toStartOf="@+id/layoutHold"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
-            android:id="@+id/btnCallHold"
-            style="@style/CallFeatureStyle"
+            <ImageButton
+                android:id="@+id/btnAddCall"
+                style="@style/CallFeatureStyle"
+                android:foreground="@drawable/ripple_effect"
+                android:src="@drawable/ic_add" />
+
+            <TextView
+                android:id="@+id/txtAdd"
+                style="@style/txtCallingFuncationStyle"
+                android:text="@string/lbladd" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/layoutHold"
+            style="@style/CallingBtnParentStyle"
             android:layout_marginTop="12dp"
-            android:contentDescription="@string/app_name"
-            android:foreground="@drawable/ripple_effect"
-            android:src="@drawable/ic_pause"
-            app:layout_constraintEnd_toStartOf="@+id/btnCallSound"
+            app:layout_constraintEnd_toStartOf="@+id/layoutBluetooth"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnAddCall"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/layoutAdd"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
-            android:id="@+id/btnCallSound"
-            style="@style/CallFeatureStyle"
+            <ImageButton
+                android:id="@+id/btnCallHold"
+                style="@style/CallFeatureStyle"
+                android:contentDescription="@string/app_name"
+                android:foreground="@drawable/ripple_effect"
+                android:src="@drawable/ic_pause" />
+
+            <TextView
+                android:id="@+id/txtHold"
+                style="@style/txtCallingFuncationStyle"
+                android:text="@string/lblhold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutBluetooth"
+            style="@style/CallingBtnParentStyle"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_bluetooth"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnCallHold"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/layoutHold"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageButton
-            android:id="@+id/btnCallDial"
-            style="@style/CallFeatureStyle"
+            <ImageButton
+                android:id="@+id/btnCallSound"
+                style="@style/CallFeatureStyle"
+                android:src="@drawable/ic_bluetooth" />
+
+            <TextView
+                android:id="@+id/txtBluetooth"
+                style="@style/txtCallingFuncationStyle"
+                android:text="@string/lblbluetooth" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/layoutDial"
+            style="@style/CallingBtnParentStyle"
             android:layout_marginTop="48dp"
             android:layout_marginEnd="16dp"
-            android:foreground="@drawable/ripple_effect"
-            android:src="@drawable/ic_keypad"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnCallMute"
-            app:layout_constraintTop_toBottomOf="@+id/btnCallSound" />
+            app:layout_constraintStart_toEndOf="@+id/layoutMute"
+            app:layout_constraintTop_toBottomOf="@+id/layoutBluetooth">
 
-        <ImageButton
-            android:id="@+id/btnCallMute"
-            style="@style/CallFeatureStyle"
+            <ImageButton
+                android:id="@+id/btnCallDial"
+                style="@style/CallFeatureStyle"
+                android:foreground="@drawable/ripple_effect"
+                android:src="@drawable/ic_keypad" />
+
+            <TextView
+                android:id="@+id/txtDial"
+                style="@style/txtCallingFuncationStyle"
+                android:text="@string/lblDial" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/layoutMute"
+            style="@style/CallingBtnParentStyle"
             android:layout_marginTop="48dp"
-            android:foreground="@drawable/ripple_effect"
-            android:src="@drawable/ic_mute"
-            app:layout_constraintEnd_toStartOf="@+id/btnCallDial"
+            app:layout_constraintEnd_toStartOf="@+id/layoutDial"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/btnSpeaker"
-            app:layout_constraintTop_toBottomOf="@+id/btnCallHold" />
+            app:layout_constraintStart_toEndOf="@+id/layoutSpeaker"
+            app:layout_constraintTop_toBottomOf="@+id/layoutHold">
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/btnSpeaker"
-            style="@style/CallFeatureStyle"
+            <ImageButton
+                android:id="@+id/btnCallMute"
+                style="@style/CallFeatureStyle"
+                android:foreground="@drawable/ripple_effect"
+                android:src="@drawable/ic_mute" />
+
+            <TextView
+                android:id="@+id/txtMute"
+                style="@style/txtCallingFuncationStyle"
+                android:text="@string/lblmute" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutSpeaker"
+            style="@style/CallingBtnParentStyle"
             android:layout_marginStart="16dp"
             android:layout_marginTop="48dp"
-            android:foreground="@drawable/ripple_effect"
-            android:src="@drawable/ic_speaker"
             app:layout_constraintCircleRadius="@dimen/_45sdp"
-            app:layout_constraintEnd_toStartOf="@+id/btnCallMute"
+            app:layout_constraintEnd_toStartOf="@+id/layoutMute"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnAddCall" />
+            app:layout_constraintTop_toBottomOf="@+id/layoutAdd">
 
+            <ImageButton
+                android:id="@+id/btnSpeaker"
+                style="@style/CallFeatureStyle"
+                android:foreground="@drawable/ripple_effect"
+                android:src="@drawable/ic_speaker" />
+
+            <TextView
+                android:id="@+id/txtSpeaker"
+                style="@style/txtCallingFuncationStyle"
+                android:text="@string/lblspeaker" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
