@@ -36,7 +36,6 @@ class CallManager(
     @RequiresApi(34)
     @SuppressLint("MissingPermission")
     fun startOutgoingCall(number: String) {
-        //showPhoneAccount()
         val test = Bundle()
         //test.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true)
         test.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, phoneAccountHandle)
@@ -56,7 +55,7 @@ class CallManager(
                 Log.d(TAG, "account is not Available")
             }
 
-        } catch (e: SecurityException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Log.e("ERROR", "ERROR FOR CALL" + e.message.toString())
         }
@@ -129,8 +128,12 @@ class CallManager(
     }
 
     fun getDefault(): CallAudioState? {
-        val service = MyInCallService.INSTANCE
-        return service!!.callAudioState
+        return try {
+            val service = MyInCallService.INSTANCE
+            service!!.callAudioState
+        } catch (ex: Exception) {
+            null
+        }
     }
 
     fun setMute(mute: Boolean) {
@@ -139,11 +142,10 @@ class CallManager(
     }
 
     fun mergeConference() {
-        if (CallObject.ANOTHERC_CALL != null) {
-            for (anotherCall in CallObject.ANOTHERC_CALL!!) {
-                //CallObject.CURRENT_CALL!!.conference(anotherCall)
-                CallObject.CURRENT_CALL!!.mergeConference()
-            }
-        } else Log.i(TAG, "mergeConference: NULL OBJECT")
+        CallObject.conferenceCall()
+    }
+
+    fun SwapCalls() {
+        CallObject.swapConferenceCall()
     }
 }

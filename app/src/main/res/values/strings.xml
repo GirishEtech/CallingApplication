@@ -16,4 +16,5 @@
     <string name="lblspeaker">Speaker</string>
     <string name="lblmute">Mute</string>
     <string name="lblDial">Dial</string>
+    <string name="lblcall_ended">Call Ended</string>
 </resources>

@@ -5,7 +5,6 @@ import android.content.DialogInterface
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
-import com.example.testapp.CallProvides.CallManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class Messages {
@@ -32,15 +31,16 @@ class Messages {
             context: Context,
             title: String,
             messages: String,
-            number: String
+            number: String,
+            function: () -> Unit
         ) {
             MaterialAlertDialogBuilder(context).setMessage(messages)
                 .setTitle(title)
                 .setPositiveButton(
                     "Ok"
                 ) { dialog, which ->
-                    val manager = CallManager(context)
-                    manager.startOutgoingCall(number)
+
+                    function.invoke()
                 }
                 .setNegativeButton(
                     "Cencel"

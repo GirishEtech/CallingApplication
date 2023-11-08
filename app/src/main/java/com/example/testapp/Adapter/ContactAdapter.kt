@@ -23,7 +23,6 @@ class ContactAdapter(
 
     inner class Holder(val binding: ContactItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val itemName = binding.txtContactName
-        val itemNumber = binding.txtContactNumber
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
@@ -44,7 +43,6 @@ class ContactAdapter(
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val item = filteredDataList[position]
         holder.itemName.text = item.name
-        holder.itemNumber.text = item.number
         holder.itemView.setOnClickListener {
             datapass.passdata(item)
         }

@@ -36,4 +36,23 @@ class PreferenceManager(context: Context) {
         return conference
     }
 
+    fun PutRinging(value: Boolean) {
+        editor.putBoolean("ISRING", value)
+        save()
+    }
+
+    fun isRinging(): Boolean {
+        return preference.getBoolean("ISRING", false)
+    }
+
+    fun putIsRegister(value: Boolean) {
+        editor.putBoolean("ISREGISTER", value)
+        save()
+    }
+
+    fun getIsregister(): Boolean {
+        val rs = preference.getBoolean("ISREGISTER", false)
+        Log.i(TAG, "getIsregister: REGISTER OR NOT  T OR F -- > $rs")
+        return rs
+    }
 }

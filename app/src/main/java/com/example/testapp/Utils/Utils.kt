@@ -3,10 +3,13 @@ package com.example.callingapp.Utils
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
+import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Environment
+import android.os.Handler
+import android.provider.CallLog
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
@@ -16,6 +19,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.io.File
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class Utils {
@@ -24,6 +30,64 @@ class Utils {
         var alertDialog: AlertDialog? = null
         private val TAG = "Utils"
         var count = 0
+
+        fun deleteCallLogEntry(context: Context, callId: Long): Int {
+            try {
+                val contentResolver: ContentResolver = context.contentResolver
+                val callUri: Uri = CallLog.Calls.CONTENT_URI
+                val whereClause = "${CallLog.Calls._ID} = ?"
+                val selectionArgs = arrayOf(callId.toString())
+
+                // Delete the call log entry
+                val deletedRows = contentResolver.delete(callUri, whereClause, selectionArgs)
+
+                return deletedRows
+            } catch (e: Exception) {
+                Log.e("CallLog", "Error deleting call log entry: ${e.message}")
+                return 0
+            }
+        }
+
+        @SuppressLint("Range")
+        fun deleteLastCallLogEntry(context: Context, handler: Handler) {
+            try {
+                handler.postDelayed({
+                    val cursor: Cursor? = context.contentResolver.query(
+                        CallLog.Calls.CONTENT_URI,  // The content URI for call logs
+                        null,                      // Projection (null for all columns)
+                        null,                      // Selection
+                        null,                      // Selection arguments
+                        "${CallLog.Calls.DATE} DESC"  // Sort order (most recent first)
+                    )
+                    cursor?.use {
+                        if (it.moveToFirst()) {
+                            val id = it.getInt(it.getColumnIndex(CallLog.Calls._ID))
+                            val number =
+                                it.getString(it.getColumnIndex(CallLog.Calls.NUMBER))
+                            val name =
+                                it.getString(it.getColumnIndex(CallLog.Calls.CACHED_NAME))
+                            val date = it.getLong(it.getColumnIndex(CallLog.Calls.DATE))
+                            val dateFormat =
+                                SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+                            val dateMain = dateFormat.format(Date(date))
+                            Log.i(
+                                TAG,
+                                "deleteLastCallLogEntry: CALLNUMBER :$number \n CALLNAME :$name \n CALLDATE :$dateMain"
+                            )
+                            val deletedRow = deleteCallLogEntry(context, id.toLong())
+                            if (deletedRow > 0) {
+                                Log.i(TAG, "deleteLastCallLogEntry: CALL LOG IS DELETED")
+                            }
+                        }
+                    }
+                }, 1500)
+
+
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                // Handle the exception (e.g., request necessary permissions) as needed.
+            }
+        }
 
 
         @SuppressLint("MissingPermission")

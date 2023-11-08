@@ -18,8 +18,9 @@ class NotificationManager(val context: Context) {
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val notificationID = 1
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission", "RemoteViewLayout")
     fun createNotification(callerName: String) {
+
         val actionIntent1 = Intent(context, OutGoingCallActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             action = "${context.packageName}.ANSWER"
@@ -39,10 +40,13 @@ class NotificationManager(val context: Context) {
             notificationManager.createNotificationChannel(channel)
             val builder = NotificationCompat.Builder(context, "my_channel_id")
                 .setSmallIcon(R.drawable.ic_call)
+                .setCategory(NotificationCompat.CATEGORY_CALL)
+                .setColor(context.getColor(android.R.color.holo_blue_light))
                 .setContentTitle("$callerName")
                 .setContentText(
                     "Incoming Call"
                 )
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .addAction(R.drawable.ic_call, "Answer", pendingIntent1)
                 .addAction(R.drawable.ic_call, "Decline", pendingIntent2)

@@ -24,7 +24,12 @@ class ReCallingActivity : AppCompatActivity() {
         _binding = ActivityReCallingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val run = Runnable {
-            startActivity(Intent(this@ReCallingActivity, MainActivity::class.java))
+            startActivity(
+                Intent(this@ReCallingActivity, MainActivity::class.java).putExtra(
+                    "isLog",
+                    true
+                )
+            )
         }
         callManager = CallManager(this)
         val name = intent.getStringExtra("NAME")
@@ -36,6 +41,6 @@ class ReCallingActivity : AppCompatActivity() {
             finish()
             callManager.startOutgoingCall(number!!)
         }
-        handler.postDelayed(run, 5000)
+        handler.postDelayed(run, 3000)
     }
 }

@@ -9,6 +9,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.telecom.TelecomManager
 import android.util.Log
 import android.view.View
@@ -16,19 +18,24 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.callingapp.Utils.Messages
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.Models.Contact
+import com.example.testapp.PreferenceManager
 import com.example.testapp.Utils.NotificationManager
+import com.example.testapp.Utils.RingtoneManage
 import com.example.testapp.databinding.ActivityMainBinding
 
 
 class MainActivity : BaseActivity(), ContactAdapter.number {
 
+    lateinit var preferences: PreferenceManager
     var permissionsList: ArrayList<String>? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     var permissionsStr = arrayOf(
@@ -51,6 +58,7 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
             val list: ArrayList<Any?> = ArrayList(it.values)
             permissionsList = ArrayList()
             permissionsCount = 0
+
             for (i in list.indices) {
                 if (shouldShowRequestPermissionRationale(permissionsStr[i])) {
                     permissionsList!!.add(permissionsStr[i])
@@ -87,12 +95,23 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        preferences = PreferenceManager(
+            this
+        )
+
+        val isLog = intent.getBooleanExtra("isLog", false)
+        if (isLog != null) {
+            if (isLog) {
+                deleteLog()
+            }
+        }
         if (intent!!.action == "${packageName}.DECLINE") {
+            deleteLog()
+            RingtoneManage.getInstance(this).StopRing()
             val telecomManager = getSystemService(TelecomManager::class.java)
             val notificationManager = NotificationManager(this)
             notificationManager.dismiss()
             telecomManager.endCall()
-            finishAffinity()
         }
         CallManager = CallManager(this)
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
@@ -185,7 +204,9 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
             "Information",
             "Are You sure you want Call",
             data.number
-        )
+        ) {
+            CallManager.startOutgoingCall(data.number)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -198,6 +219,34 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
             permissionLaunder.launch(newPermissionStr as Array<String>)
         } else {
             Messages.showPermissionDialog(this, "PERMISSION", "Permission is Empty")
+        }
+    }
+
+    private fun deleteLog() {
+        if (checkPermission()) {
+            Utils.deleteLastCallLogEntry(
+                this@MainActivity, handler
+            )
+
+        } else {
+            checkPermission()
+        }
+    }
+
+    fun checkPermission(): Boolean {
+        return if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_CALL_LOG
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_CALL_LOG, Manifest.permission.READ_CALL_LOG),
+                10
+            )
+            false
+        } else {
+            true
         }
     }
 

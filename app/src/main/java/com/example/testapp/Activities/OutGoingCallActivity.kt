@@ -32,17 +32,20 @@ import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.CallAdapter
 import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.CallProvides.CallObject
+import com.example.testapp.CallProvides.MyInCallService
 import com.example.testapp.Fragments.ModalBottomSheet
 import com.example.testapp.Models.CallModel
 import com.example.testapp.R
 import com.example.testapp.Utils.CallList
 import com.example.testapp.Utils.NotificationManager
 import com.example.testapp.Utils.OutputDevice
+import com.example.testapp.Utils.RingtoneManage
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
 
 
 class OutGoingCallActivity : BaseActivity() {
 
+    var ishold = false
     lateinit var callList: CallList
     lateinit var notificationManager: NotificationManager
     lateinit var callAudioState: CallAudioState
@@ -223,16 +226,19 @@ class OutGoingCallActivity : BaseActivity() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun callBack() {
+        Log.d(TAG, "callBack: CallBack is Called")
         Currentcall!!.registerCallback(object : Call.Callback() {
             override fun onStateChanged(call: Call?, state: Int) {
                 super.onStateChanged(call, state)
                 when (state) {
                     Call.STATE_ACTIVE -> {
-                        binding.txtCallingStatus.text = getString(R.string.lbl_active)
                         call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
                         isCallActive = true
                         call.playDtmfTone('1')
-                        startTimer()
+                        if (!ishold) {
+                            startTimer()
+                        }
+                        RingtoneManage.getInstance(this@OutGoingCallActivity).StopRing()
                         adapter.notifyDataSetChanged()
                     }
 
@@ -264,12 +270,20 @@ class OutGoingCallActivity : BaseActivity() {
                     Call.STATE_DISCONNECTED -> {
                         call!!.disconnect()
                         call.reject(Call.REJECT_REASON_DECLINED)
-                        isCallActive = false
                         stopTimer()
                         preferenceManager.setConference(false)
                         callList.deleteAll()
                         adapter.notifyDataSetChanged()
-                        finish()
+                        if (isCallActive) {
+                            startActivity(
+                                Intent(
+                                    this@OutGoingCallActivity,
+                                    MainActivity::class.java
+                                ).putExtra("isLog", true)
+                            )
+                        } else {
+                            Log.i(TAG, "onStateChanged: DISCONNECTED")
+                        }
                     }
 
                     Call.STATE_DISCONNECTING -> {
@@ -286,7 +300,7 @@ class OutGoingCallActivity : BaseActivity() {
                             "Call is Holding",
                             Toast.LENGTH_SHORT
                         ).show()
-                        call!!.hold()
+                        ishold = true
                         binding.txtCallingStatus.text = "Hold"
                     }
 
@@ -296,7 +310,8 @@ class OutGoingCallActivity : BaseActivity() {
                             "Start the call",
                             Toast.LENGTH_SHORT
                         ).show()
-                        binding.txtCallingStatus.text = getString(R.string.lbl_dialing)
+                        binding.txtCallingStatusTemp.text = getString(R.string.lbl_dialing)
+                        Log.d(TAG, "onStateChanged: FROM NEW")
                     }
 
                     Call.STATE_PULLING_CALL -> {
@@ -357,6 +372,7 @@ class OutGoingCallActivity : BaseActivity() {
         Currentcall = CallObject.CURRENT_CALL
         notificationManager = NotificationManager(this)
         if (intent.action == "${packageName}.ANSWER") {
+            RingtoneManage.getInstance(this@OutGoingCallActivity).StopRing()
             notificationManager.dismiss()
             Currentcall!!.answer(VideoProfile.STATE_AUDIO_ONLY)
         }
@@ -366,19 +382,29 @@ class OutGoingCallActivity : BaseActivity() {
         setAnimation()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         callManager = CallManager(this)
-        callAudioState = callManager.getDefault()!!
+        if (callManager.getDefault() != null) {
+            callAudioState = callManager.getDefault()!!
+        }
         if (Currentcall != null && preferenceManager.getConference()) {
             adapter.notifyDataSetChanged()
             callBack()
         } else {
-            if (Currentcall != null) {
+            if (Currentcall != null && CallObject.ANOTHERC_CALL!!.size > 1) {
                 callList.addItem(CallModel(Currentcall!!, true, false))
                 callBack()
+                binding.callList.adapter = adapter
+                preferenceManager.setConference(false)
+            } else if (Currentcall != null) {
+                binding.txtCallerNameTemp.text =
+                    Utils.getCallerName(this, Currentcall!!.details.handle.schemeSpecificPart)
+                callBack()
             }
-            binding.callList.adapter = adapter
-            preferenceManager.setConference(false)
         }
         binding.btnCallend.setOnClickListener {
+            isCallActive = false
+            if (preferenceManager.getIsregister()) {
+                unregisterReceiver(MyInCallService.receiver)
+            }
             if (ActivityCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ANSWER_PHONE_CALLS
@@ -388,11 +414,11 @@ class OutGoingCallActivity : BaseActivity() {
             } else {
                 val Number = CallObject.CURRENT_CALL!!.details.handle.schemeSpecificPart
                 if (Currentcall == null) {
-
                     startActivity(Intent(this, ReCallingActivity::class.java).apply {
                         putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
                         putExtra("NUMBER", Number)
                     })
+                    Log.e(TAG, "initComponents: Curren Call is Null")
                 } else {
                     if (isCallActive) {
                         Currentcall!!.disconnect()
@@ -400,14 +426,28 @@ class OutGoingCallActivity : BaseActivity() {
                             putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
                             putExtra("NUMBER", Number)
                         })
+                        Log.i(TAG, "initComponents: Call is Active")
                     } else {
                         getSystemService(TelecomManager::class.java).endCall()
                         startActivity(Intent(this, ReCallingActivity::class.java).apply {
                             putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
                             putExtra("NUMBER", Number)
                         })
+                        Log.i(TAG, "initComponents: Call is Ended ForceFully")
                     }
                 }
+                if (CallObject.ANOTHERC_CALL!!.size > 1) {
+                    for (i in CallObject.ANOTHERC_CALL!!) {
+                        i.disconnect()
+                    }
+                    getSystemService(TelecomManager::class.java).endCall()
+                    startActivity(Intent(this, ReCallingActivity::class.java).apply {
+                        putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
+                        putExtra("NUMBER", Number)
+                    })
+                    Log.e(TAG, "initComponents: Curren ended")
+                }
+
             }
         }
         binding.btnAddCall.setOnClickListener {

@@ -2,10 +2,10 @@ package com.example.testapp.Activities
 
 import android.app.NotificationManager
 import android.content.Intent
-import android.media.Ringtone
-import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.telecom.Call
 import android.telecom.VideoProfile
 import android.util.Log
@@ -13,10 +13,10 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.CallProvides.CallObject
+import com.example.testapp.Utils.RingtoneManage
 import com.example.testapp.databinding.ActivityIncomingCallBinding
 
 
-@Suppress("CAST_NEVER_SUCCEEDS")
 class IncomingCallActivity : BaseActivity() {
 
     companion object {
@@ -24,7 +24,6 @@ class IncomingCallActivity : BaseActivity() {
     }
 
     val TAG = "IncomingCallActivity"
-    lateinit var ringtone: Ringtone
     lateinit var _binding: ActivityIncomingCallBinding
     private val binding: ActivityIncomingCallBinding
         get() = _binding
@@ -37,7 +36,6 @@ class IncomingCallActivity : BaseActivity() {
         if (call != null) {
             binding.TxtCallName.text =
                 Utils.getCallerName(this, call!!.details.handle.schemeSpecificPart)
-            binding.TxtCallerNumber.text = call!!.details.handle.schemeSpecificPart
             Log.i(TAG, "onCreate: full call Details ${call!!.details} ")
             Toast.makeText(this, "call is Ringing", Toast.LENGTH_SHORT).show()
             callBack()
@@ -59,7 +57,11 @@ class IncomingCallActivity : BaseActivity() {
                         ).show()
                         call!!.disconnect()
                         call.reject(Call.REJECT_REASON_DECLINED)
-                        startActivity(Intent(this@IncomingCallActivity, MainActivity::class.java))
+                        startActivity(
+                            Intent(this@IncomingCallActivity, MainActivity::class.java)
+                                .putExtra("isLog", true)
+                        )
+                        RingtoneManage.getInstance(this@IncomingCallActivity).StopRing()
                         finish()
                     }
 
@@ -72,60 +74,75 @@ class IncomingCallActivity : BaseActivity() {
                     }
 
                     Call.STATE_ACTIVE -> {
-
+                        Toast.makeText(
+                            this@IncomingCallActivity,
+                            "INCOMING IS ACTIVE",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     Call.STATE_AUDIO_PROCESSING -> {
                     }
 
                     Call.STATE_CONNECTING -> {
-                        TODO()
+
                     }
 
                     Call.STATE_DIALING -> {
-                        TODO()
+                        Toast.makeText(
+                            this@IncomingCallActivity,
+                            "INCOMING IS DIALING",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     Call.STATE_DISCONNECTING -> {
-                        TODO()
+
                     }
 
                     Call.STATE_HOLDING -> {
-                        TODO()
+                        Toast.makeText(
+                            this@IncomingCallActivity,
+                            "INCOMING IS HOLDING",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     Call.STATE_NEW -> {
-                        TODO()
+                        Toast.makeText(this@IncomingCallActivity, "NEW STATE", Toast.LENGTH_SHORT)
+                            .show()
                     }
 
                     Call.STATE_PULLING_CALL -> {
-                        TODO()
+                        Toast.makeText(
+                            this@IncomingCallActivity,
+                            "INCOMING IS PULLING",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     Call.STATE_RINGING -> {
-                        TODO()
+                        Toast.makeText(
+                            this@IncomingCallActivity,
+                            "INCOMING IS RINGING",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         })
     }
 
-    fun startDefaultRingtone() {
-        val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
-        ringtone = RingtoneManager.getRingtone(this, ringtoneUri)
-        ringtone.play()
-    }
 
     @RequiresApi(Build.VERSION_CODES.R)
     private fun initComponent() {
-        startDefaultRingtone()
         binding.btnCallAccept.setOnClickListener {
             if (call != null) {
                 CallObject.CURRENT_CALL = call
                 call!!.answer(VideoProfile.STATE_AUDIO_ONLY)
                 call!!.playDtmfTone('1')
                 startActivity(Intent(this, OutGoingCallActivity::class.java))
-                stopRingtone()
+                RingtoneManage.getInstance(this).StopRing()
                 finish()
             }
         }
@@ -133,33 +150,24 @@ class IncomingCallActivity : BaseActivity() {
             if (call != null) {
                 call!!.reject(Call.REJECT_REASON_DECLINED)
                 startActivity(Intent(this, MainActivity::class.java))
-                stopRingtone()
+                RingtoneManage.getInstance(this).StopRing()
             }
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        stopRingtone()
-
-    }
-
-    fun stopRingtone() {
-        if (ringtone.isPlaying) {
-            ringtone.stop()
-        }
-    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        if (intent?.action == "ANSWER") {
-            dismissNotification()
-        } else if (intent?.action == "DECLINE") {
+        if (intent?.action == "ANSWER" || intent?.action == "DECLINE") {
             dismissNotification()
         }
     }
 
     private fun dismissNotification() {
+        RingtoneManage.getInstance(this).StopRing()
+        Utils.deleteLastCallLogEntry(this, Handler(Looper.getMainLooper()))
+        Toast.makeText(this, "Notification is Dismiss", Toast.LENGTH_SHORT).show()
+        Log.i(TAG, "dismissNotification: Dismiss Notification Function")
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(1) // 1 is the notification ID
     }
