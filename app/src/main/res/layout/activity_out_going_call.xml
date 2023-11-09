@@ -222,7 +222,7 @@
                 android:id="@+id/btnCallDial"
                 style="@style/CallFeatureStyle"
                 android:foreground="@drawable/ripple_effect"
-                android:src="@drawable/ic_keypad" />
+                android:src="@drawable/ic_call_merge" />
 
             <TextView
                 android:id="@+id/txtDial"

@@ -11,6 +11,7 @@ import android.telecom.InCallService
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.testapp.PreferenceManager
 import com.example.testapp.reciever.PhoneCallReceiver
@@ -54,6 +55,7 @@ class MyInCallService : InCallService() {
         if (call.details.callDirection == Call.Details.DIRECTION_INCOMING) {
             if (!preferenceManager!!.getStatus()) {
                 registerReceiver(receiver, intentFilter)
+                Toast.makeText(this, "RECEIVER IS REGISTERED", Toast.LENGTH_SHORT).show()
                 preferenceManager!!.putIsRegister(true)
             }
         } else if (call.details.callDirection == Call.Details.DIRECTION_OUTGOING) {

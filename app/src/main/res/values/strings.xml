@@ -15,6 +15,6 @@
     <string name="lblbluetooth">bluetooth</string>
     <string name="lblspeaker">Speaker</string>
     <string name="lblmute">Mute</string>
-    <string name="lblDial">Dial</string>
+    <string name="lblDial">Merge</string>
     <string name="lblcall_ended">Call Ended</string>
 </resources>

@@ -23,6 +23,7 @@ import android.telecom.CallAudioState
 import android.telecom.TelecomManager
 import android.telecom.VideoProfile
 import android.util.Log
+import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -369,6 +370,7 @@ class OutGoingCallActivity : BaseActivity() {
         Log.i(TAG, "initComponents: Activity is Rebuild...")
         callList = CallList()
         adapter = CallAdapter(callList.getAllData())
+        binding.callList.adapter = adapter
         Currentcall = CallObject.CURRENT_CALL
         notificationManager = NotificationManager(this)
         if (intent.action == "${packageName}.ANSWER") {
@@ -380,30 +382,30 @@ class OutGoingCallActivity : BaseActivity() {
         btnOn = resources.getColor(R.color.SpeakerOn)
         buttomSheet = ModalBottomSheet()
         setAnimation()
+        manageExpand()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         callManager = CallManager(this)
         if (callManager.getDefault() != null) {
             callAudioState = callManager.getDefault()!!
         }
         if (Currentcall != null && preferenceManager.getConference()) {
+            binding.callListLayout.visibility = View.VISIBLE
+            binding.layoutTemp.visibility = View.GONE
+            callList.addItem(CallModel(Currentcall!!, true, true))
             adapter.notifyDataSetChanged()
-            callBack()
+            manageExpand()
         } else {
-            if (Currentcall != null && CallObject.ANOTHERC_CALL!!.size > 1) {
-                callList.addItem(CallModel(Currentcall!!, true, false))
-                callBack()
-                binding.callList.adapter = adapter
-                preferenceManager.setConference(false)
-            } else if (Currentcall != null) {
-                binding.txtCallerNameTemp.text =
-                    Utils.getCallerName(this, Currentcall!!.details.handle.schemeSpecificPart)
-                callBack()
-            }
+            binding.layoutTemp.visibility = View.VISIBLE
+            binding.callListLayout.visibility = View.GONE
+            binding.txtCallerNameTemp.text =
+                Utils.getCallerName(this, Currentcall!!.details.handle.schemeSpecificPart)
+            callBack()
         }
         binding.btnCallend.setOnClickListener {
             isCallActive = false
             if (preferenceManager.getIsregister()) {
                 unregisterReceiver(MyInCallService.receiver)
+                Toast.makeText(this, "RECEIVER IS UNREGISTER", Toast.LENGTH_SHORT).show()
             }
             if (ActivityCompat.checkSelfPermission(
                     this,
@@ -452,6 +454,19 @@ class OutGoingCallActivity : BaseActivity() {
         }
         binding.btnAddCall.setOnClickListener {
             buttomSheet.show(supportFragmentManager, ModalBottomSheet.TAG)
+        }
+    }
+
+    private fun manageExpand() {
+        var isExpand = true
+        binding.btnExpandCallConference.setOnClickListener {
+            if (isExpand) {
+                binding.callListLayout.visibility = View.VISIBLE
+                isExpand = false
+            } else {
+                binding.callListLayout.visibility = View.GONE
+                isExpand = true
+            }
         }
     }
 

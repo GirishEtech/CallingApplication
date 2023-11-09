@@ -2,9 +2,11 @@ package com.example.testapp.CallProvides
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Context.POWER_SERVICE
 import android.content.Intent
 import android.media.Ringtone
 import android.os.Build
+import android.os.PowerManager
 import android.telecom.Call
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -51,6 +53,17 @@ class CallObject(val context: Context) {
         }
     }
 
+    fun isScreenOn(): Boolean {
+        val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            powerManager.isInteractive
+        } else {
+            @Suppress("DEPRECATION")
+            powerManager.isScreenOn
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun setDirection(call: Call?) {
         val isActive = preferenceManager.getStatus()
@@ -71,7 +84,8 @@ class CallObject(val context: Context) {
                 RingtoneManage.getInstance(context).PlayRing()
                 Log.i(LOG_TAG, "onCallAdded: isActive :$isActive")
                 Log.i(LOG_TAG, "onCallAdded: ConferenceAdded-orNot $isConference")
-                if (isActive) {
+                if (isActive || !isScreenOn()) {
+                    val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
                     val intent = Intent(context, IncomingCallActivity::class.java)
                     IncomingCallActivity.call = call
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

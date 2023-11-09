@@ -55,6 +55,7 @@ class ModalBottomSheet : BottomSheetDialogFragment(), ContactAdapter.number {
     @SuppressLint("MissingPermission")
     @RequiresApi(value = 34)
     override fun passdata(data: Contact) {
+        dismiss()
         val manager = CallManager(requireContext())
         manager.startOutgoingCall(data.number)
         preferenceManager.setConference(true)
