@@ -15,7 +15,7 @@ open class BaseActivity : AppCompatActivity() {
         preferenceManager = PreferenceManager(this)
         preferenceManager.setConference(false)
         try {
-            if (preferenceManager.getStatus()) {
+            if (preferenceManager.getStatus() && preferenceManager.getIsregister()) {
                 unregisterReceiver(MyInCallService.receiver)
             }
         } catch (ex: Exception) {

@@ -35,7 +35,6 @@ import com.example.testapp.CallProvides.CallManager
 import com.example.testapp.CallProvides.CallObject
 import com.example.testapp.CallProvides.MyInCallService
 import com.example.testapp.Fragments.ModalBottomSheet
-import com.example.testapp.Models.CallModel
 import com.example.testapp.R
 import com.example.testapp.Utils.CallList
 import com.example.testapp.Utils.NotificationManager
@@ -44,7 +43,7 @@ import com.example.testapp.Utils.RingtoneManage
 import com.example.testapp.databinding.ActivityOutGoingCallBinding
 
 
-class OutGoingCallActivity : BaseActivity() {
+class OutGoingCallActivity : BaseActivity(), CallAdapter.itemListner {
 
     var ishold = false
     lateinit var callList: CallList
@@ -58,11 +57,16 @@ class OutGoingCallActivity : BaseActivity() {
     private val REQUEST_CODE = 0
     private var isBluetoothon = false
     private var isSpeakeron = false
-    lateinit var adapter: CallAdapter
+
     private lateinit var audioManager: AudioManager
     private lateinit var buttomSheet: ModalBottomSheet
     var isCallActive = false
     var Currentcall: Call? = null
+
+    companion object {
+        var adapter: CallAdapter? = null
+        var binding1: ActivityOutGoingCallBinding? = null
+    }
 
     val TAG = "OutGoingCallActivity"
     private lateinit var _binding: ActivityOutGoingCallBinding
@@ -74,6 +78,7 @@ class OutGoingCallActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         _binding = ActivityOutGoingCallBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding1 = binding
         initComponents()
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -229,6 +234,7 @@ class OutGoingCallActivity : BaseActivity() {
     private fun callBack() {
         Log.d(TAG, "callBack: CallBack is Called")
         Currentcall!!.registerCallback(object : Call.Callback() {
+            @SuppressLint("MissingPermission")
             override fun onStateChanged(call: Call?, state: Int) {
                 super.onStateChanged(call, state)
                 when (state) {
@@ -240,7 +246,7 @@ class OutGoingCallActivity : BaseActivity() {
                             startTimer()
                         }
                         RingtoneManage.getInstance(this@OutGoingCallActivity).StopRing()
-                        adapter.notifyDataSetChanged()
+                        adapter?.notifyDataSetChanged()
                     }
 
                     Call.STATE_AUDIO_PROCESSING -> {
@@ -265,7 +271,7 @@ class OutGoingCallActivity : BaseActivity() {
                             "Call is Dialing",
                             Toast.LENGTH_SHORT
                         ).show()
-                        binding.txtCallingStatus.text = getString(R.string.lbl_calling)
+                        binding.txtCallingStatusTemp.text = getString(R.string.lbl_calling)
                     }
 
                     Call.STATE_DISCONNECTED -> {
@@ -274,7 +280,7 @@ class OutGoingCallActivity : BaseActivity() {
                         stopTimer()
                         preferenceManager.setConference(false)
                         callList.deleteAll()
-                        adapter.notifyDataSetChanged()
+                        adapter?.notifyDataSetChanged()
                         if (isCallActive) {
                             startActivity(
                                 Intent(
@@ -282,6 +288,7 @@ class OutGoingCallActivity : BaseActivity() {
                                     MainActivity::class.java
                                 ).putExtra("isLog", true)
                             )
+                            getSystemService(TelecomManager::class.java).endCall()
                         } else {
                             Log.i(TAG, "onStateChanged: DISCONNECTED")
                         }
@@ -302,7 +309,7 @@ class OutGoingCallActivity : BaseActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                         ishold = true
-                        binding.txtCallingStatus.text = "Hold"
+                        binding.txtCallingStatusTemp.text = "Hold"
                     }
 
                     Call.STATE_NEW -> {
@@ -369,20 +376,21 @@ class OutGoingCallActivity : BaseActivity() {
     private fun initComponents() {
         Log.i(TAG, "initComponents: Activity is Rebuild...")
         callList = CallList()
-        adapter = CallAdapter(callList.getAllData())
-        binding.callList.adapter = adapter
         Currentcall = CallObject.CURRENT_CALL
+        adapter = CallAdapter(callList.getAllData(), this, Currentcall!!)
+        binding.callList.adapter = adapter
+        manageExpand()
         notificationManager = NotificationManager(this)
         if (intent.action == "${packageName}.ANSWER") {
             RingtoneManage.getInstance(this@OutGoingCallActivity).StopRing()
             notificationManager.dismiss()
             Currentcall!!.answer(VideoProfile.STATE_AUDIO_ONLY)
+            binding.layoutTemp.visibility = View.VISIBLE
         }
         btnOff = resources.getColor(android.R.color.black)
         btnOn = resources.getColor(R.color.SpeakerOn)
         buttomSheet = ModalBottomSheet()
         setAnimation()
-        manageExpand()
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         callManager = CallManager(this)
         if (callManager.getDefault() != null) {
@@ -391,15 +399,18 @@ class OutGoingCallActivity : BaseActivity() {
         if (Currentcall != null && preferenceManager.getConference()) {
             binding.callListLayout.visibility = View.VISIBLE
             binding.layoutTemp.visibility = View.GONE
-            callList.addItem(CallModel(Currentcall!!, true, true))
-            adapter.notifyDataSetChanged()
+            adapter?.notifyDataSetChanged()
+            Log.i(TAG, "initComponents: now Layout is Visible to me....")
+            Toast.makeText(this, "Conference is added", Toast.LENGTH_SHORT).show()
             manageExpand()
-        } else {
+        } else if (Currentcall != null) {
             binding.layoutTemp.visibility = View.VISIBLE
             binding.callListLayout.visibility = View.GONE
             binding.txtCallerNameTemp.text =
                 Utils.getCallerName(this, Currentcall!!.details.handle.schemeSpecificPart)
             callBack()
+            Log.i(TAG, "initComponents: Layout not Visible")
+            Toast.makeText(this, "Layout not Visible", Toast.LENGTH_SHORT).show()
         }
         binding.btnCallend.setOnClickListener {
             isCallActive = false
@@ -420,7 +431,7 @@ class OutGoingCallActivity : BaseActivity() {
                         putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
                         putExtra("NUMBER", Number)
                     })
-                    Log.e(TAG, "initComponents: Curren Call is Null")
+                    Log.e(TAG, "initComponents: Current Call is Null")
                 } else {
                     if (isCallActive) {
                         Currentcall!!.disconnect()
@@ -438,16 +449,16 @@ class OutGoingCallActivity : BaseActivity() {
                         Log.i(TAG, "initComponents: Call is Ended ForceFully")
                     }
                 }
-                if (CallObject.ANOTHERC_CALL!!.size > 1) {
-                    for (i in CallObject.ANOTHERC_CALL!!) {
-                        i.disconnect()
+                if (callList.getAllData().size > 1) {
+                    for (i in callList.getAllData()) {
+                        i.callData.disconnect()
                     }
                     getSystemService(TelecomManager::class.java).endCall()
                     startActivity(Intent(this, ReCallingActivity::class.java).apply {
                         putExtra("NAME", Utils.getCallerName(this@OutGoingCallActivity, Number))
                         putExtra("NUMBER", Number)
                     })
-                    Log.e(TAG, "initComponents: Curren ended")
+                    Log.e(TAG, "initComponents: All Calls are ended")
                 }
 
             }
@@ -455,16 +466,19 @@ class OutGoingCallActivity : BaseActivity() {
         binding.btnAddCall.setOnClickListener {
             buttomSheet.show(supportFragmentManager, ModalBottomSheet.TAG)
         }
+        binding.btnMerge.setOnClickListener {
+            CallObject.MergeConference()
+        }
     }
 
     private fun manageExpand() {
         var isExpand = true
         binding.btnExpandCallConference.setOnClickListener {
             if (isExpand) {
-                binding.callListLayout.visibility = View.VISIBLE
+                binding.callList.visibility = View.VISIBLE
                 isExpand = false
             } else {
-                binding.callListLayout.visibility = View.GONE
+                binding.callList.visibility = View.GONE
                 isExpand = true
             }
         }
@@ -513,11 +527,125 @@ class OutGoingCallActivity : BaseActivity() {
                 val h = totalSeconds / 3600
                 val m = (totalSeconds % 3600) / 60
                 val s = totalSeconds % 60
-                binding.txtCallingStatus.text = String.format("%02d:%02d:%02d", h, m, s)
+                binding.txtCallingStatusTemp.text = String.format("%02d:%02d:%02d", h, m, s)
                 totalSeconds++
                 handler.postDelayed(this, 1000)  // Update every second
             }
         })
     }
 
+    override fun count(size: Int) {
+
+        Toast.makeText(this, "list item Size :$size", Toast.LENGTH_SHORT).show()
+        if (size > 1) {
+            binding.callListLayout.visibility = View.VISIBLE
+            binding.layoutTemp.visibility = View.GONE
+        } else {
+            binding.callListLayout.visibility = View.GONE
+            binding.layoutTemp.visibility = View.VISIBLE
+        }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    override fun setCallback(call: Call, position: Int) {
+        val name = Utils.getCallerName(this, call.details.handle.schemeSpecificPart)
+        call.registerCallback(object : Call.Callback() {
+            override fun onStateChanged(call: Call?, state: Int) {
+                super.onStateChanged(call!!, state)
+                when (state) {
+                    Call.STATE_ACTIVE -> {
+                        Toast.makeText(
+                            binding.root.context,
+                            "$name Call is Active",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        call.playDtmfTone('1')
+                        call.answer(VideoProfile.STATE_AUDIO_ONLY)
+                    }
+
+                    Call.STATE_DISCONNECTED -> {
+                        Toast.makeText(
+                            binding.root.context,
+                            "$name Call is Disconnected ",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        adapter!!.itemRemove(position)
+                        Utils.deleteLastCallLogEntry(this@OutGoingCallActivity, handler)
+                    }
+
+                    Call.STATE_HOLDING -> {
+                        Toast.makeText(
+                            binding.root.context,
+                            "$name Call is Holding ",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+
+                    Call.STATE_RINGING -> {
+                        Toast.makeText(
+                            binding.root.context,
+                            "$name Call is Ringing",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+
+                    Call.STATE_AUDIO_PROCESSING -> {
+
+                    }
+
+                    Call.STATE_CONNECTING -> {
+
+                    }
+
+                    Call.STATE_DIALING -> {
+
+                    }
+
+                    Call.STATE_DISCONNECTING -> {
+
+                    }
+
+                    Call.STATE_NEW -> {
+
+                    }
+
+                    Call.STATE_PULLING_CALL -> {
+
+                    }
+
+                    Call.STATE_SELECT_PHONE_ACCOUNT -> {
+
+                    }
+
+                    Call.STATE_SIMULATED_RINGING -> {
+
+                    }
+                }
+            }
+
+        })
+    }
+
+    @SuppressLint("NotifyDataSetChanged", "MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun callEnd(call: Call, position: Int) {
+        call.disconnect()
+        Toast.makeText(
+            this,
+            "Call item is Removed -- > ${
+                Utils.getCallerName(
+                    this,
+                    call.details.handle.schemeSpecificPart
+                )
+            }",
+            Toast.LENGTH_SHORT
+        ).show()
+        Utils.deleteLastCallLogEntry(this, handler)
+        adapter!!.notifyDataSetChanged()
+    }
 }

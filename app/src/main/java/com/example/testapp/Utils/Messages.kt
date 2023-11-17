@@ -31,7 +31,6 @@ class Messages {
             context: Context,
             title: String,
             messages: String,
-            number: String,
             function: () -> Unit
         ) {
             MaterialAlertDialogBuilder(context).setMessage(messages)

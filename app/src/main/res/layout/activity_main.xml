@@ -4,48 +4,35 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".Activities.MainActivity">
 
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/_5sdp"
-        android:background="@drawable/custom_seachview"
-        android:iconifiedByDefault="false"
-        android:queryHint="@string/lblsearchhint"
-        app:circularflow_radiusInDP="20"
-        app:layout_constraintCircleRadius="@dimen/_5sdp"
+        android:layout_height="0dp"
+        android:background="@drawable/home_bg"
+        app:layout_constraintBottom_toTopOf="@+id/buttom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/contactList"
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/buttom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/_5sdp"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_height="@dimen/_35sdp"
+        android:layout_margin="@dimen/_5sdp"
+        android:textAlignment="center"
+        app:backgroundTint="@color/white"
+        app:itemIconSize="@dimen/_3sdp"
+        app:itemRippleColor="@color/quantum_tealA700"
+        app:itemTextAppearanceActive="@color/quantum_tealA700"
+        app:itemTextAppearanceInactive="@android:color/darker_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView" />
+        app:menu="@menu/item_buttom">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="@dimen/_50ssp"
-        android:layout_height="@dimen/_50ssp"
-        android:layout_marginBottom="295dp"
-        android:indeterminate="true"
-        android:indeterminateTint="@android:color/holo_green_dark"
-        android:requiresFadingEdge="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchView"
-        app:layout_constraintVertical_bias="0.736" />
-
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
 </androidx.constraintlayout.widget.ConstraintLayout>

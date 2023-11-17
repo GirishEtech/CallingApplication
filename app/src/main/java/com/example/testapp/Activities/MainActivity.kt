@@ -12,20 +12,23 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.telecom.TelecomManager
-import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.widget.SearchView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import com.example.callingapp.Utils.Messages
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
-import com.example.testapp.Models.Contact
+import com.example.testapp.Fragments.ContactFragment
+import com.example.testapp.Fragments.RecentCallsFragment
 import com.example.testapp.PreferenceManager
+import com.example.testapp.R
+import com.example.testapp.RoomDatabase.Contact
 import com.example.testapp.Utils.NotificationManager
 import com.example.testapp.Utils.RingtoneManage
 import com.example.testapp.databinding.ActivityMainBinding
@@ -79,9 +82,6 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
 
         }
 
-
-    lateinit var items: List<Contact>
-    lateinit var adapter: ContactAdapter
     val TAG = "MainActivity"
     private val REQUEST_ID: Int = 2
     lateinit var CallManager: CallManager
@@ -160,42 +160,29 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
     }
 
     fun displayData() {
-        val items = Utils.getContactList(this)
-        if (items.isEmpty()) {
-            Log.e(TAG, "displayData: item is Empty")
-            val data = Utils.getContactList(this)
-            setData(data)
-        } else {
-            setData(items)
+        loadFragment(RecentCallsFragment())
+        binding.buttomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.itemContacts -> {
+                    loadFragment(ContactFragment())
+                }
+
+                R.id.itemRecents -> {
+                    loadFragment(RecentCallsFragment())
+                }
+            }
+            true
         }
 
     }
 
-    private fun setData(items: List<Contact>) {
-        if (items.isEmpty()) {
-            binding.progressBar.visibility = View.VISIBLE
-        } else {
-            this.items = items
-            binding.progressBar.visibility = View.INVISIBLE
-            adapter = ContactAdapter(
-                items, this
-            )
-            binding.contactList.adapter = adapter
-            binding.searchView.setIconifiedByDefault(false)
-            binding.contactList.visibility = View.VISIBLE
-            binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
-                    return false
-                }
-
-                override fun onQueryTextChange(newText: String?): Boolean {
-                    adapter.filter.filter(newText)
-                    return true
-                }
-            })
-        }
-
+    private fun loadFragment(fragment: Fragment) {
+        val fragmentManager: FragmentManager = supportFragmentManager
+        val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.fragmentContainer, fragment)
+        fragmentTransaction.commit()
     }
+
 
     @RequiresApi(34)
     override fun passdata(data: Contact) {
@@ -203,7 +190,6 @@ class MainActivity : BaseActivity(), ContactAdapter.number {
             this,
             "Information",
             "Are You sure you want Call",
-            data.number
         ) {
             CallManager.startOutgoingCall(data.number)
         }

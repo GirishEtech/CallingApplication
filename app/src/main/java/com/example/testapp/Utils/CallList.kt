@@ -7,9 +7,6 @@ class CallList {
         val callList: ArrayList<CallModel> = ArrayList()
     }
 
-    fun addItem(item: CallModel) {
-        callList.add(item)
-    }
 
     fun getAllData(): ArrayList<CallModel> {
         return callList

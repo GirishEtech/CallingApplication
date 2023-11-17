@@ -8,17 +8,6 @@
     android:background="@drawable/call_bg"
     tools:context=".Activities.OutGoingCallActivity">
 
-    <TextView
-        android:id="@+id/txtCallingStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#F3DEDE"
-        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/callListLayout"
-        app:layout_constraintVertical_bias="0.156" />
 
     <ImageButton
         android:id="@+id/btnCallend"
@@ -33,7 +22,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.48"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintLayout" />
 
     <LinearLayout
         android:id="@+id/layoutTemp"
@@ -41,7 +31,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/_30sdp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/txtCallingStatus"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -51,6 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:text="DEMO NAME"
             android:textColor="@color/black"
             android:textSize="@dimen/_15ssp"
             android:textStyle="bold" />
@@ -61,6 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/_20ssp"
+            android:text="STATUS"
             android:textColor="@color/white"
             android:textSize="@dimen/_10ssp"
             android:textStyle="bold" />
@@ -69,14 +62,16 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/callListLayout"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/_10ssp"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_10sdp"
         android:layout_marginTop="@dimen/_10ssp"
-        android:layout_marginEnd="@dimen/_10ssp"
         android:background="@drawable/icon_bg"
+        android:maxHeight="@dimen/_130sdp"
         android:orientation="horizontal"
         android:padding="@dimen/_10ssp"
-        android:visibility="gone"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -91,9 +86,10 @@
 
         <ImageButton
             android:id="@+id/btnExpandCallConference"
-            android:layout_width="@dimen/_30sdp"
-            android:layout_height="@dimen/_10ssp"
+            android:layout_width="@dimen/_40sdp"
+            android:layout_height="@dimen/_30sdp"
             android:backgroundTint="@android:color/transparent"
+            android:scaleType="fitXY"
             android:src="@android:drawable/arrow_down_float"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -101,8 +97,7 @@
         <LinearLayout
             android:id="@+id/layoutCalls"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -112,8 +107,9 @@
                 android:id="@+id/callList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_30sdp"
-                android:layout_marginTop="36dp"
+                android:layout_marginStart="@dimen/_5sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_5sdp"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -131,12 +127,12 @@
         android:layout_margin="@dimen/_10ssp"
         android:background="@drawable/calling_bg"
         android:padding="@dimen/_20ssp"
-        app:layout_constraintBottom_toTopOf="@+id/btnCallend"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txtCallingStatus"
-        app:layout_constraintVertical_bias="0.636">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5">
 
         <LinearLayout
             android:id="@+id/layoutAdd"
@@ -219,7 +215,7 @@
             app:layout_constraintTop_toBottomOf="@+id/layoutBluetooth">
 
             <ImageButton
-                android:id="@+id/btnCallDial"
+                android:id="@+id/btnMerge"
                 style="@style/CallFeatureStyle"
                 android:foreground="@drawable/ripple_effect"
                 android:src="@drawable/ic_call_merge" />

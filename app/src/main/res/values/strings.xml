@@ -17,4 +17,8 @@
     <string name="lblmute">Mute</string>
     <string name="lblDial">Merge</string>
     <string name="lblcall_ended">Call Ended</string>
+    <string name="lblrecents">Recents</string>
+    <string name="lblcontacts">Contacts</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

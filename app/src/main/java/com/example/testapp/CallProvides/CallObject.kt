@@ -4,11 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Context.POWER_SERVICE
 import android.content.Intent
-import android.media.Ringtone
 import android.os.Build
 import android.os.PowerManager
 import android.telecom.Call
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Activities.IncomingCallActivity
@@ -26,7 +27,6 @@ class CallObject(val context: Context) {
         ANOTHERC_CALL = ArrayList()
     }
 
-    lateinit var ringtone: Ringtone
     val notificationManager = com.example.testapp.Utils.NotificationManager(context)
     private val LOG_TAG = "CallObject"
     private val subject = BehaviorSubject.create<Call>()
@@ -42,17 +42,17 @@ class CallObject(val context: Context) {
 
         @SuppressLint("StaticFieldLeak")
         var INSTANCE: CallObject? = null
-        fun conferenceCall() {
-            if (ANOTHERC_CALL!!.size > 1) {
-                CURRENT_CALL!!.mergeConference()
-            }
+        fun MergeConference() {
+            CURRENT_CALL!!.mergeConference()
         }
 
+        const val TAG = "CallObject"
         fun swapConferenceCall() {
             CURRENT_CALL?.swapConference()
         }
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     fun isScreenOn(): Boolean {
         val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
 
@@ -75,7 +75,9 @@ class CallObject(val context: Context) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(intent)
                 } else {
-                    CallList.callList.add(CallModel(call, true, true))
+                    OutGoingCallActivity.adapter?.notifyDataSetChanged()
+                    OutGoingCallActivity.binding1?.callListLayout?.visibility = View.VISIBLE
+                    OutGoingCallActivity.binding1?.layoutTemp?.visibility = View.GONE
                 }
 
             }
@@ -85,11 +87,11 @@ class CallObject(val context: Context) {
                 Log.i(LOG_TAG, "onCallAdded: isActive :$isActive")
                 Log.i(LOG_TAG, "onCallAdded: ConferenceAdded-orNot $isConference")
                 if (isActive || !isScreenOn()) {
-                    val powerManager = context.getSystemService(POWER_SERVICE) as PowerManager
                     val intent = Intent(context, IncomingCallActivity::class.java)
                     IncomingCallActivity.call = call
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     context.startActivity(intent)
+                    Toast.makeText(context, "INCOMING IS CALl", Toast.LENGTH_SHORT).show()
                 } else {
                     preferenceManager.PutRinging(true)
                     notificationManager.createNotification(
@@ -113,28 +115,30 @@ class CallObject(val context: Context) {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun updateCall(call: Call?) {
         INSTANCE = this
-        if (currentCall != null) {
+        if (preferenceManager.getConference()) {
             call?.let {
                 if (it.details.handle.schemeSpecificPart ==
-                    currentCall!!.details.handle.schemeSpecificPart
+                    CURRENT_CALL!!.details.handle.schemeSpecificPart
                 ) {
                     CURRENT_CALL = call
-                    currentCall = call
+                    Log.i(TAG, "updateCall: this is Same Call as Well")
                 } else {
-                    ANOTHERC_CALL!!.add(call)
-                    anotherCall = call
+                    preferenceManager.setConference(true)
+                    CallList.callList.add(CallModel(call, true, true))
                     CURRENT_CALL!!.conference(call)
+                    Log.i(TAG, "updateCall: this is not Same Call As Well")
                 }
             }
+
         } else {
+            call?.let { CallModel(it, true, true) }?.let { CallList.callList.add(it) }
             CURRENT_CALL = call
-            currentCall = call
+            preferenceManager.setConference(false)
         }
         setDirection(call)
         call?.let {
             subject.onNext(it)
         }
     }
-
 
 }

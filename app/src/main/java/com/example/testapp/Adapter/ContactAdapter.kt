@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
-import com.example.testapp.Models.Contact
+import com.example.testapp.RoomDatabase.Contact
 import com.example.testapp.databinding.ContactItemBinding
 import java.util.Locale
 
@@ -21,7 +21,7 @@ class ContactAdapter(
     }
 
 
-    inner class Holder(val binding: ContactItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class Holder(binding: ContactItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val itemName = binding.txtContactName
     }
 
@@ -31,14 +31,15 @@ class ContactAdapter(
     }
 
     override fun getItemCount(): Int {
+
+        Log.i("TAG", "getItemCount: ${filteredDataList.size}")
         if (filteredDataList.isEmpty()) {
-            Log.i("TAG", "getItemCount: ")
+            ///Log.i("TAG", "getItemCount: ${filteredDataList.size}")
         } else {
             return filteredDataList.size
         }
         return 0
     }
-
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val item = filteredDataList[position]
@@ -52,7 +53,6 @@ class ContactAdapter(
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val filteredResults = mutableListOf<Contact>()
-
                 if (constraint.isNullOrEmpty()) {
                     filteredResults.addAll(items)
                 } else {
@@ -70,7 +70,8 @@ class ContactAdapter(
             }
 
             override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
-                filteredDataList = results?.values as ArrayList<Contact>
+                filteredDataList =
+                    results?.values as ArrayList<Contact>
                 notifyDataSetChanged()
             }
         }

@@ -29,6 +29,7 @@ class CallService : ConnectionService() {
         request: ConnectionRequest?
     ): Connection {
         con = MyConnection(this)
+        con.connectionCapabilities = Connection.CAPABILITY_MERGE_CONFERENCE
         con.setAddress(request!!.address, PRESENTATION_ALLOWED)
         con.extras = request.extras
         con.videoState = request.videoState
@@ -45,6 +46,7 @@ class CallService : ConnectionService() {
         request: ConnectionRequest?
     ): Connection {
         val connection = MyConnection(this)
+        connection.connectionCapabilities = Connection.CAPABILITY_MERGE_CONFERENCE
         connection.setAddress(request!!.address, PRESENTATION_ALLOWED)
         connection.extras = request.extras
         connection.videoState = request.videoState

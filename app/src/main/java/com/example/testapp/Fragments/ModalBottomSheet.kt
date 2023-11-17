@@ -10,10 +10,12 @@ import androidx.appcompat.widget.SearchView
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
-import com.example.testapp.Models.Contact
 import com.example.testapp.PreferenceManager
+import com.example.testapp.RoomDatabase.Contact
 import com.example.testapp.databinding.ButtomSheetDesignBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ModalBottomSheet : BottomSheetDialogFragment(), ContactAdapter.number {
 
@@ -30,20 +32,23 @@ class ModalBottomSheet : BottomSheetDialogFragment(), ContactAdapter.number {
     ): View {
         _binding = ButtomSheetDesignBinding.inflate(inflater)
         preferenceManager = PreferenceManager(requireContext())
-        val list = Utils.getContactList(requireContext())
-        val adapter = ContactAdapter(list, this)
-        binding.lstButtomContact.adapter = adapter
-        binding.seachView.setIconifiedByDefault(false)
-        binding.seachView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
-            }
+        GlobalScope.launch {
+            val list = Utils.getContactList(requireContext())
+            val adapter = list?.let { ContactAdapter(it, this@ModalBottomSheet) }
+            binding.lstButtomContact.adapter = adapter
+            binding.seachView.setIconifiedByDefault(false)
+            binding.seachView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    return false
+                }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                adapter.filter.filter(newText)
-                return true
-            }
-        })
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    adapter?.filter?.filter(newText)
+                    return true
+                }
+            })
+        }
+
         return binding.root
     }
 

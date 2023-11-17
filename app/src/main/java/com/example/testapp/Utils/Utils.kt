@@ -7,18 +7,14 @@ import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.os.Environment
 import android.os.Handler
 import android.provider.CallLog
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
-import com.example.testapp.Models.Contact
-import com.example.testapp.Utils.DatabaseHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import java.io.File
-import java.io.IOException
+import com.example.testapp.RoomDatabase.Contact
+import com.example.testapp.RoomDatabase.ContactLogs
+import com.example.testapp.RoomDatabase.DBHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,6 +26,7 @@ class Utils {
         var alertDialog: AlertDialog? = null
         private val TAG = "Utils"
         var count = 0
+        var listCallLogs = ArrayList<ContactLogs>()
 
         fun deleteCallLogEntry(context: Context, callId: Long): Int {
             try {
@@ -47,6 +44,7 @@ class Utils {
                 return 0
             }
         }
+
 
         @SuppressLint("Range")
         fun deleteLastCallLogEntry(context: Context, handler: Handler) {
@@ -97,56 +95,40 @@ class Utils {
                     && mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothAdapter.STATE_CONNECTED)
         }
 
-        fun getRecordingFile(FileName: String): File? {
-
-            // Get the external storage directory
-            val externalStorageDirectory = Environment.getExternalStorageDirectory()
-
-            // Create the directory if it doesn't exist
-            val DIRECTORY_NAME = "CallRecordings"
-            val callRecordingsDirectory = File(externalStorageDirectory, DIRECTORY_NAME)
-            if (!callRecordingsDirectory.exists()) {
-                callRecordingsDirectory.mkdirs()
-            }
-            var filname = "$FileName.m4a"
-            // Create the file for the call recording
-            var callRecordingFile = File(callRecordingsDirectory, filname)
-            try {
-                // Create a new file
-                if (callRecordingFile.exists()) {
-                    count++
-                    filname = "$FileName($count).m4a"
-                    callRecordingFile = File(callRecordingsDirectory, filname)
-                    return callRecordingFile
-                } else {
-                    if (callRecordingFile.createNewFile()) {
-                        // File successfully created
-                        return callRecordingFile
-                    }
-                }
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-            return null // Return null if file creation fails
-        }
-
 
         @SuppressLint("Range")
-        fun getContactList(context: Context): List<Contact> {
-            val db = DatabaseHelper(context)
-            if (db.getAllContacts().isEmpty()) {
-                val scope = CoroutineScope(Dispatchers.IO)
-                loadContactFromStorage(context, db)
 
+        suspend fun getContactList(
+            context: Context,
+        ): List<Contact>? {
+            val db = DBHelper.getInstance(context)
+                ?.ContactDao()
+            if (db?.getUsers()?.isEmpty() == true) {
+                loadContactFromStorage(context)
             } else {
-                return db.getAllContacts()
+                return db?.getUsers()
+            }
+
+            return ArrayList()
+        }
+
+        @SuppressLint("Range")
+        suspend fun getContactLogsList(context: Context): List<ContactLogs> {
+            val db = DBHelper.getInstance(context)
+                ?.ContactLogsDao()!!
+            if (db.getUsers().isEmpty()) {
+                loadContactLogsFromStorage(context)
+            } else {
+                return db.getUsers()
             }
             return ArrayList()
         }
 
 
         @SuppressLint("Range")
-        private fun loadContactFromStorage(context: Context, db: DatabaseHelper) {
+        private suspend fun loadContactFromStorage(context: Context) {
+            val db = DBHelper.getInstance(context)
+            val db1 = db?.ContactDao()
             val contentResolver = context.contentResolver
             val contactsUri = ContactsContract.Contacts.CONTENT_URI
             val sortOrder = "${ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME}  ASC"
@@ -167,13 +149,81 @@ class Utils {
                     if (contactName == null) {
                         Log.e(TAG, "getContactList: one contact is null")
                     } else {
-                        val contact = Contact(contactId.toInt(), contactName, number)
-                        db.addContact(contact)
+                        val contact = Contact(
+                            0,
+                            contactId.toInt(),
+                            contactName,
+                            number
+                        )
+                        db1?.insertUser(contact)
                         Log.i(TAG, "loadContactFromStorage: one Contact added : $contact")
                     }
                 }
                 cursor.close()
             }
+        }
+
+        @SuppressLint("Range")
+        private suspend fun loadContactLogsFromStorage(context: Context) {
+            val db = DBHelper.getInstance(context)
+            val ContactLogstbl = db?.ContactLogsDao()!!
+            val cursor: Cursor? = context.contentResolver.query(
+                CallLog.Calls.CONTENT_URI,
+                null,
+                null,
+                null,
+                "${CallLog.Calls.DATE} DESC"
+            )
+            listCallLogs.clear()
+            cursor?.use {
+                while (it.moveToNext()) {
+                    val id = it.getInt(it.getColumnIndex(CallLog.Calls._ID))
+                    val number =
+                        it.getString(it.getColumnIndex(CallLog.Calls.NUMBER))
+                    val name =
+                        if (it.getString(it.getColumnIndex(CallLog.Calls.CACHED_NAME)) == null || it.getString(
+                                it.getColumnIndex(CallLog.Calls.CACHED_NAME)
+                            ) == ""
+                        ) "UNKNOWN" else it.getString(
+                            it.getColumnIndex(CallLog.Calls.CACHED_NAME)
+                        )
+                    val calltype = it.getInt(it.getColumnIndex(CallLog.Calls.TYPE))
+                    var CALLTYPE: String
+                    when (calltype) {
+                        CallLog.Calls.INCOMING_TYPE -> {
+                            CALLTYPE = "INCOMING"
+                            val model = ContactLogs(0, id.toString(), name, CALLTYPE, number)
+                            Log.i(TAG, "loadContactLogsFromStorage: $model")
+                            ContactLogstbl.insertUser(model)
+                            listCallLogs.add(model)
+                        }
+
+                        CallLog.Calls.OUTGOING_TYPE -> {
+                            CALLTYPE = "OUTGOING"
+                            val model = ContactLogs(0, id.toString(), name, CALLTYPE, number)
+                            Log.i(TAG, "loadContactLogsFromStorage: $model")
+                            ContactLogstbl.insertUser(model)
+                            listCallLogs.add(model)
+
+                        }
+
+                        CallLog.Calls.MISSED_TYPE -> {
+                            CALLTYPE = "MISSED"
+                            val model = ContactLogs(0, id.toString(), name, CALLTYPE, number)
+                            Log.i(TAG, "loadContactLogsFromStorage: $model")
+                            ContactLogstbl.insertUser(model)
+                            listCallLogs.add(model)
+                        }
+
+                        else -> {}
+                    }
+
+
+                }
+            }
+
+
+            cursor?.close()
         }
 
         @SuppressLint("Range")

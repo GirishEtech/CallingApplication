@@ -86,7 +86,7 @@ class CallManager(
             "${R.string.app_name}"
         )
             .setCapabilities(
-                PhoneAccount.CAPABILITY_CALL_PROVIDER and PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING and PhoneAccount.CAPABILITY_CALL_SUBJECT
+                PhoneAccount.CAPABILITY_CALL_PROVIDER and PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING
             )
             .setIcon(Icon.createWithResource(context, R.drawable.ic_call))
             .setShortDescription("${R.string.app_name}")
@@ -142,7 +142,7 @@ class CallManager(
     }
 
     fun mergeConference() {
-        CallObject.conferenceCall()
+        CallObject.MergeConference()
     }
 
     fun SwapCalls() {

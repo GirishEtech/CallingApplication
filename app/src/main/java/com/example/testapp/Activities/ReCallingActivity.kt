@@ -35,7 +35,6 @@ class ReCallingActivity : AppCompatActivity() {
         val name = intent.getStringExtra("NAME")
         val number = intent.getStringExtra("NUMBER")
         binding.TxtCallName.text = name
-        binding.TxtCallerNumber.text = number
         binding.btnTryCall.setOnClickListener {
             handler.removeCallbacks(run)
             finish()

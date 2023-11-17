@@ -21,7 +21,8 @@ class MyConnection(context: Context) : Connection() {
 
     init {
         connectionProperties = PROPERTY_SELF_MANAGED
-        connectionCapabilities = CAPABILITY_SUPPORT_HOLD and CAPABILITY_HOLD
+        connectionCapabilities =
+            CAPABILITY_SUPPORT_HOLD and CAPABILITY_HOLD and CAPABILITY_MERGE_CONFERENCE
         context.startActivity(
             Intent(
                 context,

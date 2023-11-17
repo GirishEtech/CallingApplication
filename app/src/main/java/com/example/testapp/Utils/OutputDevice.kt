@@ -5,3 +5,9 @@ enum class OutputDevice {
     SPEAKER,
     EARPIECE,
 }
+
+enum class CallType {
+    MISSED,
+    OUTGOING,
+    INCOMING
+}
