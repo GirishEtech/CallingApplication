@@ -467,7 +467,7 @@ class OutGoingCallActivity : BaseActivity(), CallAdapter.itemListner {
             buttomSheet.show(supportFragmentManager, ModalBottomSheet.TAG)
         }
         binding.btnMerge.setOnClickListener {
-            CallObject.MergeConference()
+            callManager.mergeConference()
         }
     }
 

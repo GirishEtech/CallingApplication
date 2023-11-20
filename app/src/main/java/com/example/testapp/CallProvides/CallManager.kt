@@ -142,7 +142,7 @@ class CallManager(
     }
 
     fun mergeConference() {
-        CallObject.MergeConference()
+        CallObject.MergeConference(context)
     }
 
     fun SwapCalls() {

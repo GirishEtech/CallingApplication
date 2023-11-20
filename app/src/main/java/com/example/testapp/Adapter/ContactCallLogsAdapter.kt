@@ -51,14 +51,19 @@ class ContactCallLogsAdapter(
         when (item.type) {
             CallType.MISSED.toString() -> {
                 holder.itemType.setImageResource(R.drawable.ic_missed)
+                holder.itemType.imageTintList =
+                    ColorStateList.valueOf(holder.itemView.context.getColor(R.color.SpeakerOn))
             }
 
             CallType.OUTGOING.toString() -> {
                 holder.itemType.setImageResource(R.drawable.ic_made)
+                holder.itemType.imageTintList =
+                    ColorStateList.valueOf(holder.itemView.context.getColor(android.R.color.holo_green_light))
             }
 
             CallType.INCOMING.toString() -> {
                 holder.itemType.setImageResource(R.drawable.ic_recieved)
+
             }
 
             else -> {

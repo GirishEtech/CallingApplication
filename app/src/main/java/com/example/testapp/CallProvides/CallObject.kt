@@ -18,8 +18,6 @@ import com.example.testapp.Models.CallModel
 import com.example.testapp.PreferenceManager
 import com.example.testapp.Utils.CallList
 import com.example.testapp.Utils.RingtoneManage
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 class CallObject(val context: Context) {
 
@@ -29,11 +27,10 @@ class CallObject(val context: Context) {
 
     val notificationManager = com.example.testapp.Utils.NotificationManager(context)
     private val LOG_TAG = "CallObject"
-    private val subject = BehaviorSubject.create<Call>()
-    private var currentCall: Call? = null
-    private var anotherCall: Call? = null
+
+    //private val subject = BehaviorSubject.create<Call>()
     private var preferenceManager = PreferenceManager(context)
-    fun updates(): Observable<Call> = subject
+    //fun updates(): Observable<Call> = subject
 
 
     companion object {
@@ -42,8 +39,17 @@ class CallObject(val context: Context) {
 
         @SuppressLint("StaticFieldLeak")
         var INSTANCE: CallObject? = null
-        fun MergeConference() {
-            CURRENT_CALL!!.mergeConference()
+        fun MergeConference(context: Context) {
+            if (CURRENT_CALL?.details?.hasProperty(Call.Details.PROPERTY_CONFERENCE)!!) {
+                for (i in CallList.callList) {
+                    if (i.isConfereneActive && !i.isFirst) {
+                        CURRENT_CALL?.conference(i.callData)
+                    }
+                }
+                CURRENT_CALL!!.mergeConference()
+            } else {
+                Toast.makeText(context, "Call is Not Provide Conference", Toast.LENGTH_SHORT).show()
+            }
         }
 
         const val TAG = "CallObject"
@@ -124,21 +130,17 @@ class CallObject(val context: Context) {
                     Log.i(TAG, "updateCall: this is Same Call as Well")
                 } else {
                     preferenceManager.setConference(true)
-                    CallList.callList.add(CallModel(call, true, true))
-                    CURRENT_CALL!!.conference(call)
+                    CallList.callList.add(CallModel(call, true, true, false))
                     Log.i(TAG, "updateCall: this is not Same Call As Well")
                 }
             }
 
         } else {
-            call?.let { CallModel(it, true, true) }?.let { CallList.callList.add(it) }
+            call?.let { CallModel(it, true, true, true) }?.let { CallList.callList.add(it) }
             CURRENT_CALL = call
             preferenceManager.setConference(false)
         }
         setDirection(call)
-        call?.let {
-            subject.onNext(it)
-        }
     }
 
 }

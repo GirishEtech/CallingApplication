@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.appcompat.widget.SearchView
+import com.example.callingapp.Utils.Messages
 import com.example.callingapp.Utils.Utils
 import com.example.testapp.Adapter.ContactAdapter
 import com.example.testapp.CallProvides.CallManager
@@ -62,7 +63,13 @@ class ModalBottomSheet : BottomSheetDialogFragment(), ContactAdapter.number {
     override fun passdata(data: Contact) {
         dismiss()
         val manager = CallManager(requireContext())
-        manager.startOutgoingCall(data.number)
-        preferenceManager.setConference(true)
+        Messages.showAlertForNextStep(
+            requireContext(),
+            "add Conference",
+            "Are You sure You Want to add Call?"
+        ) {
+            manager.startOutgoingCall(data.number)
+            preferenceManager.setConference(true)
+        }
     }
 }
